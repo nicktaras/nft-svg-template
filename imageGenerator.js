@@ -12,6 +12,7 @@ const googleFontData = require('./googleFontData');
 
 // Autograph Templates
 const template = require("./htmlTemplates/labelled_autograph_template");
+const { fontsize } = require('./htmlTemplates/labelled_autograph_template');
 
 /*
   FUNCTION:
@@ -48,7 +49,8 @@ module.exports = async (
       imageBuffer,   // Image buffer (png, gif, jpg)
       rootPixelSize, // Base font size calculated by the scale of the longest length of the image
       lastLabelYPos, // Used to apply the labels to the NFT + the Signed/Requested text
-      outerMargin;   // percent based margin (will be calculated to be 5%)
+      outerMargin,   // percent based margin (will be calculated to be 5%)
+      output         // return data
   
   // load SVG template
   const $ = cheerio.load(template);
@@ -160,17 +162,17 @@ module.exports = async (
   // Apply Status
   $('.autograph-nft-status text').eq(0).text(`${data[0].title}`);
 
-  // Apply Labels
-  let labelTemplates = '';
-  
-  // add labels
-  let incrementVal;
-
   // Collect the last three labels (upto 3 will be shown in the view)
   let labelData = data.slice(0, 3);
 
   // Reverse order to build the labels up the NFT (last to first)
   labelData = labelData.reverse();
+
+  // Apply Labels
+  let labelTemplates = '';
+  
+  // add labels
+  let incrementVal;
 
   labelData.map((label, index) => {
 
@@ -183,28 +185,40 @@ module.exports = async (
     let addOuterMargin = data.length <= 3 ? outerMargin : 0;
     const yPos = imgH - labelHeight - labelPositionByIndex - offset - addOuterMargin;
     
+    //
+    let labelMaker = ''; 
+    let startPos = rootPixelSize * 1.7; 
+    textWidth = 0;
+        
     // e.g. [@,B,e,e,p,l,e,.,3,4,6,4,6,6,5,6,4]
-    label.name.match(/./g).concat(['.']).concat(label.twitterId.match(/./g)).map(char => {
+    label.name.match(/./g).concat(['.']).concat(label.twitterId.match(/./g)).map((char, index) => {
+
       const val = googleFontData[char];
-      // default if char not found e.g. Special Char (fall back)
-      // Applies the last disovered char or applies the font size
-      if(!val) textWidth += incrementVal ? incrementVal : 21;
-      else {
-        // Calulate and increment the width.
-        incrementVal = (shortestInLength/100) * (googleFontData[char]/3.5);
-        textWidth += incrementVal;
-      }
+      
+      labelMaker += `
+        <tspan
+          x="${startPos + textWidth}"
+          y="${rootPixelSize * 1.2}"
+          width=${val}
+        >
+          ${char}
+        </tspan>
+      `;
+
+      textWidth += (val * (rootPixelSize * 0.065));
+
     });
-    textWidth += rootPixelSize * 1.5; // add space for avatar
+    textWidth += rootPixelSize * 1.9; // add space for avatar
     const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
     const imgPadding = rootPixelSize * 0.15; // padding top / left for image
     const autographFontSize = rootPixelSize * 1.1;
+
     // build label templates
     labelTemplates += `
       <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
         <rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
         <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
-            <tspan x="${rootPixelSize * 1.8}" y="${rootPixelSize * 1.2}">${label.name}.${label.twitterId}</tspan>
+            <tspan x="${rootPixelSize * 1.8}" y="${rootPixelSize * 1.2}">${labelMaker}</tspan>
         </text>
         <svg x="${imgPadding}" y="${imgPadding}" width="${twitterImageWidth}" height="${twitterImageWidth}">
           <defs>
@@ -213,7 +227,7 @@ module.exports = async (
             </clipPath>
           </defs>
           <image width="${twitterImageWidth}" height="${twitterImageWidth}" clip-path="url(#myCircle)" />
-          </svg>
+        </svg>
       </svg>
     `;
     lastLabelYPos = yPos;
@@ -263,11 +277,10 @@ module.exports = async (
     $('.not-signed').remove();
   };
 
-  // template with remixed data
-  let output = $('.autograph-nft-wrapper').eq(0);
-  
   // SVG
   if (contentType.indexOf("svg") > -1) {
+    // template with remixed data
+    output = $('.autograph-nft-wrapper').eq(0);
     // get SVG image buffer
     imageBuffer = await svg2png({
       input: output,

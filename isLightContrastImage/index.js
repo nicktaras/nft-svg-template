@@ -1,5 +1,4 @@
 const getColors = require('get-image-colors');
-const fetch = require('node-fetch');
 const Jimp = require('jimp');
 
 /*
@@ -94,9 +93,6 @@ module.exports = async ({
       allowedTextColors
   });
   
-  // For debugging
-  // console.log(output);
-
   return !(output === "#ffffff") ? true : false;
 
 };
