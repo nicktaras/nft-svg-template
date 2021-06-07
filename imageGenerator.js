@@ -149,7 +149,7 @@ module.exports = async (
       "height": svgMargin * 1.2 
     });
     // Timestamp positioning
-    $('.timestamp text').attr({ 
+    $('.autograph-nft-timestamp text').attr({ 
       "x": outerMargin,
       "y": - (imgW - (outerMargin * 1.5)), 
       "font-size": rootPixelSize * 1 
@@ -163,9 +163,9 @@ module.exports = async (
   const dateStamp = `${d.getDate()}${months[n]}${d.getFullYear()}`;
   
   // Apply Stamp
-  $('.timestamp text').text(`${data[0].mark}.${dateStamp}`);
+  $('.autograph-nft-timestamp text').text(`${data[0].mark}.${dateStamp}`);
   // Apply Status
-  $('.status text').eq(0).text(`${data[0].title}`);
+  $('.autograph-nft-status text').eq(0).text(`${data[0].title}`);
 
   // Apply Labels
   let labelTemplates = '';
@@ -215,7 +215,7 @@ module.exports = async (
     const autographFontSize = rootPixelSize * 1.1; // TODO FIX (*REQUIRES FIX)
     // build label templates
     labelTemplates += `
-      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
+      <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
         <rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
         <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
             <tspan x="${rootPixelSize * 1.8}" y="${rootPixelSize * 1.2}">${label.name}.${label.twitterId}</tspan>
@@ -238,7 +238,7 @@ module.exports = async (
     const autographFontSize = rootPixelSize * 1.1;
     const yPos = imgH - labelHeight * 1.7; 
     const maxLabelTemplate = `
-      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - (autographFontSize * 6.5)) - (outerMargin)}" y="${yPos}">
+      <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - (autographFontSize * 6.5)) - (outerMargin)}" y="${yPos}">
         <g>
           <rect x="0" y="0" width="${autographFontSize * 6.5}" height="${labelHeight}" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
           <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
@@ -251,7 +251,7 @@ module.exports = async (
   };
   
   // Append all the labels to the Remixed NFT template
-  $('.label-container').eq(0).append(`${labelTemplates}`);
+  $('.autograph-nft-label-container').eq(0).append(`${labelTemplates}`);
 
   // Add Twitter Profile Images
   await Promise.all(labelData.map(async (label, index)  => {
@@ -259,7 +259,7 @@ module.exports = async (
     const imagePhotoURLBuffer = await imagePhotoURL.buffer();
     const photoURLContentType = await imagePhotoURL.headers.get('content-type');
     imagePhotoURLBase64 = `data:image/${photoURLContentType};base64,`+imagePhotoURLBuffer.toString('base64');
-    $('.label image').eq(index).attr('href', imagePhotoURLBase64);
+    $('.autograph-nft-label image').eq(index).attr('href', imagePhotoURLBase64);
   }));
 
   // Status text positioning
@@ -269,8 +269,8 @@ module.exports = async (
   } else { 
     xPosStatus = (imgW - rootPixelSize * 5.2) - (outerMargin); 
   }
-  $('.status').attr({ "x": xPosStatus, "y": lastLabelYPos - rootPixelSize * 4 });
-  $('.status text').attr({ "font-size": rootPixelSize * 0.8, "y": rootPixelSize * 3.2 });
+  $('.autograph-nft-status').attr({ "x": xPosStatus, "y": lastLabelYPos - rootPixelSize * 4 });
+  $('.autograph-nft-status text').attr({ "font-size": rootPixelSize * 0.8, "y": rootPixelSize * 3.2 });
   
   // Remove the 'not signed label' when signed view
   if (data[0].title.toUpperCase() === "SIGNED") {
@@ -278,30 +278,59 @@ module.exports = async (
   };
 
   // TOOD - Re-apply the colour checking logic
-  // // integrate smarts here (Get colour)
-  // let isLightImage = true;
-  // // not SVG
-  // if (contentType.indexOf("svg") <= -1) {
-  //   // can be increased at the cost of performance
-  //   const imageArea = 5;
-  //   isLightImage = await isLightContrastImage({ 
-  //     imageBuffer,
-  //     x: 0,
-  //     y: 0,
-  //     dx: (imgW/imageArea) > 1 ? (imgW/imageArea) : 1,
-  //     dy: (imgH/imageArea) > 1 ? (imgH/imageArea) : 1,
-  //   });
-  // }
+  // integrate smarts here (Get colour)
+  let isLightImage = true;
+  // not SVG
+  if (contentType.indexOf("svg") <= -1) {
+    // can be increased at the cost of performance
+    const imageArea = 5;
+    isLightImage = await isLightContrastImage({ 
+      imageBuffer,
+      x: 0,
+      y: 0,
+      dx: (imgW/imageArea) > 1 ? (imgW/imageArea) : 1,
+      dy: (imgH/imageArea) > 1 ? (imgH/imageArea) : 1,
+    });
+  }
   // SVG - TODO 
-  // if (contentType.indexOf("svg") > -1) {
-  //   isLightImage = await isLightContrastImage({ imageBuffer: imageBuffer });
-  // }
+  if (contentType.indexOf("svg") > -1) {
+    // prepare output
+    const removeList = [
+      "<html><head></head><body>",
+      "</body></html>"
+    ];
+    // output is SVG wrapped in html
+    let output = $.html();
+    // remove the outer html wrapper
+    removeList.map((item) => {
+      output = output.replace(item, "");
+    });
+    const pngOutput = await svg2png({
+      input: output,
+      encoding: 'buffer',
+      format: 'png',
+    });
+    // can be increased at the cost of performance
+    const imageArea = 5;
+    isLightImage = await isLightContrastImage({ 
+      imageBuffer: pngOutput,
+      x: 0,
+      y: 0,
+      dx: (imgW/imageArea) > 1 ? (imgW/imageArea) : 1,
+      dy: (imgH/imageArea) > 1 ? (imgH/imageArea) : 1,
+    });
+  }
+
   // // Define if the colour theme for text is black or white.
-  // const colourTheme = isLightImage ? "black" : "white";
-  // const labelbackgroundCRBGA = isLightImage ? "rgba(0,0,0,0.24)" : "rgba(255,255,255,0.24)";
+  const colourTheme = isLightImage ? "black" : "white";
+  const labelbackgroundCRBGA = "black";
+  // const labelbackgroundCRBGA = !isLightImage ? "rgb(0,0,0)" : "rgb(255,255,255)";
   // // apply white / black colour theme
-  // $('.label, .not-signed').css("background-color", labelbackgroundCRBGA);
-  // $('.label, .autograph, .not-signed, .status, .stamp').css({ 'color': colourTheme });
+  $('.autograph-nft-label rect, .autograph-nft-not-signed rect').css({ fill: labelbackgroundCRBGA });
+  $('.autograph-nft-label text tspan, .autograph-nft-not-signed text tspan, .autograph-nft-status text, .autograph-nft-timestamp text')
+  .attr({
+    'fill': colourTheme 
+  });
   
   // prepare output
   const removeList = [
