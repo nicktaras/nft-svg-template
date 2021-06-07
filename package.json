@@ -11,12 +11,9 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.9",
     "get-image-colors": "^4.0.0",
-    "get-pixels": "^3.3.2",
-    "html-to-image": "^1.6.2",
     "image-size": "^1.0.0",
     "jimp": "^0.16.1",
     "node-fetch": "^2.6.1",
-    "sharp": "^0.28.3",
     "svg-png-converter": "^0.0.9",
     "svg64": "^1.1.0"
   }

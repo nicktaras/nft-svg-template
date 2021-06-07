@@ -276,23 +276,8 @@ module.exports = async (
   if (data[0].title.toUpperCase() === "SIGNED") {
     $('.autograph-nft-not-signed').remove();
   };
-
-  // TOOD - Re-apply the colour checking logic
-  // integrate smarts here (Get colour)
-  let isLightImage = true;
-  // not SVG
-  if (contentType.indexOf("svg") <= -1) {
-    // can be increased at the cost of performance
-    const imageArea = 5;
-    isLightImage = await isLightContrastImage({ 
-      imageBuffer,
-      x: 0,
-      y: 0,
-      dx: (imgW/imageArea) > 1 ? (imgW/imageArea) : 1,
-      dy: (imgH/imageArea) > 1 ? (imgH/imageArea) : 1,
-    });
-  }
-  // SVG - TODO 
+  
+  // SVG
   if (contentType.indexOf("svg") > -1) {
     // prepare output
     const removeList = [
@@ -305,28 +290,33 @@ module.exports = async (
     removeList.map((item) => {
       output = output.replace(item, "");
     });
-    const pngOutput = await svg2png({
+    // get SVG image buffer
+    imageBuffer = await svg2png({
       input: output,
       encoding: 'buffer',
       format: 'png',
     });
-    // can be increased at the cost of performance
-    const imageArea = 5;
-    isLightImage = await isLightContrastImage({ 
-      imageBuffer: pngOutput,
-      x: 0,
-      y: 0,
-      dx: (imgW/imageArea) > 1 ? (imgW/imageArea) : 1,
-      dy: (imgH/imageArea) > 1 ? (imgH/imageArea) : 1,
-    });
   }
 
-  // // Define if the colour theme for text is black or white.
+  // can be increased at the cost of performance
+  const imageArea = 5;
+  let isLightImage = true;
+  isLightImage = await isLightContrastImage({ 
+    imageBuffer,
+    x: 0,
+    y: 0,
+    dx: (imgW/imageArea) > 1 ? (imgW/imageArea) : 1,
+    dy: (imgH/imageArea) > 1 ? (imgH/imageArea) : 1,
+  });
+
+  // Define if the colour theme for text is black or white.
   const colourTheme = isLightImage ? "black" : "white";
-  const labelbackgroundCRBGA = "black";
-  // const labelbackgroundCRBGA = !isLightImage ? "rgb(0,0,0)" : "rgb(255,255,255)";
-  // // apply white / black colour theme
-  $('.autograph-nft-label rect, .autograph-nft-not-signed rect').css({ fill: labelbackgroundCRBGA });
+  const labelbackgroundCRBGA = isLightImage ? "black" : "white";
+  // apply white / black colour theme
+  $('.autograph-nft-label rect, .autograph-nft-not-signed rect')
+  .css({ 
+    'fill': labelbackgroundCRBGA 
+  });
   $('.autograph-nft-label text tspan, .autograph-nft-not-signed text tspan, .autograph-nft-status text, .autograph-nft-timestamp text')
   .attr({
     'fill': colourTheme 
@@ -345,10 +335,6 @@ module.exports = async (
   removeList.map((item) => {
     output = output.replace(item, "");
   });
-
-  // Add this back to the output file when done
-  // <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-  // <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 
   // Base64 output if parameter flag set to true
   if (base64Encode) output = svg64(output);
