@@ -169,9 +169,6 @@ module.exports = async (
 
   // Apply Labels
   let labelTemplates = '';
-  
-  // add labels
-  let incrementVal;
 
   labelData.map((label, index) => {
 
@@ -184,9 +181,11 @@ module.exports = async (
     let addOuterMargin = data.length <= 3 ? outerMargin : 0;
     const yPos = imgH - labelHeight - labelPositionByIndex - offset - addOuterMargin;
     
-    //
-    let labelMaker = ''; 
+    // Placeholder to build SVG label text 
+    let autographSVGText = ''; 
+    // Start position beside the Twitter profile image
     let startPosX = rootPixelSize * 1.7; 
+    // Text width (incremented as the letters are defined in SVG)
     textWidth = 0;
         
     // e.g. [@,B,e,e,p,l,e,.,3,4,6,4,6,6,5,6,4]
@@ -194,7 +193,7 @@ module.exports = async (
 
       const val = googleFontData[char];
 
-      labelMaker += `
+      autographSVGText += `
         <tspan
           x="${startPosX + textWidth}"
           y="${rootPixelSize * 1.2}"
@@ -208,17 +207,20 @@ module.exports = async (
       textWidth += (val * (rootPixelSize * 0.065));
 
     });
-    textWidth += rootPixelSize * 1.9; // add space for avatar
+
+    const twitterIdProfileWidth = rootPixelSize * 1.9; // width of twitter image with margin left/right
     const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
     const imgPadding = rootPixelSize * 0.15; // padding top / left for image
     const autographFontSize = rootPixelSize * 1.1;
+
+    textWidth += twitterIdProfileWidth;
 
     // build label templates
     labelTemplates += `
       <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
         <rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
         <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
-            <tspan x="${rootPixelSize * 1.8}" y="${rootPixelSize * 1.2}">${labelMaker}</tspan>
+            <tspan x="${rootPixelSize * 1.8}" y="${rootPixelSize * 1.2}">${autographSVGText}</tspan>
         </text>
         <svg x="${imgPadding}" y="${imgPadding}" width="${twitterImageWidth}" height="${twitterImageWidth}">
           <defs>
@@ -232,6 +234,7 @@ module.exports = async (
     `;
     lastLabelYPos = yPos;
   });
+  
   // "More..." Label
   if (data.length > 3) {
     const labelHeight = rootPixelSize * 1.7;
