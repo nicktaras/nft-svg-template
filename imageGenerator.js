@@ -1,6 +1,7 @@
 const cheerio = require('cheerio');
-
-// convert
+const svg64 = require('svg64');
+const fetch = require('node-fetch');
+const sizeOf = require('image-size');
 const svg2png = require('svg-png-converter').svg2png;
 
 // lib to detect image contrast returning if image is light or dark
@@ -9,13 +10,8 @@ const isLightContrastImage = require('./isLightContrastImage');
 // Reads the Barlow Font widths (needed to correctly calculate width of labels)
 const googleFontData = require('./googleFontData');
 
-// Enable for SVG to be converted to Base64
-const svg64 = require('svg64');
-const fetch = require('node-fetch');
-const sizeOf = require('image-size');
-
-// SVG Template
-const template = require("./htmlTemplates/SVG-Template-Test-Output");
+// Autograph Templates
+const template = require("./htmlTemplates/labelled_autograph_template");
 
 /*
   FUNCTION:
@@ -50,7 +46,6 @@ module.exports = async (
   let imgH,          // Height of Remix NFT
       imgW,          // Width of Remix NFT
       imageBuffer,   // Image buffer (png, gif, jpg)
-      svgMargin,     // Scale based value that can be used to scale text/elements to the NFT
       rootPixelSize, // Base font size calculated by the scale of the longest length of the image
       lastLabelYPos, // Used to apply the labels to the NFT + the Signed/Requested text
       outerMargin;   // percent based margin (will be calculated to be 5%)
@@ -124,9 +119,6 @@ module.exports = async (
     $('.autograph-nft-wrapper').css({ height: imgH, width: imgW });
     $('.autograph-nft-wrapper').attr({ 'viewBox': `0 0 ${imgW} ${imgH}` });
 
-    // common margin 
-    svgMargin = rootPixelSize * 3;
-
     // 5% outer margin
     outerMargin = shortestInLength * 0.05;
 
@@ -145,8 +137,8 @@ module.exports = async (
     $('.autograph-nft-not-signed rect').attr({ 
       "x": outerMargin,
       "y": outerMargin,
-      "width": svgMargin * 3.7, 
-      "height": svgMargin * 1.2 
+      "width": rootPixelSize * 11, 
+      "height": rootPixelSize * 3.65
     });
     // Timestamp positioning
     $('.autograph-nft-timestamp text').attr({ 
