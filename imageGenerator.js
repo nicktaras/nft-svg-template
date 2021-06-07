@@ -117,7 +117,6 @@ module.exports = async (
     shortestInLength = imgW < imgH ? imgW : imgH;
 
     // scale baseline of autograph / timestamp data 
-    // (TODO Review this baseline value - is there a simpler value that can be used?)
     rootPixelSize = shortestInLength / 16 * 0.64;
 
     // Apply Calculation (height / width)
@@ -197,22 +196,16 @@ module.exports = async (
       // Applies the last disovered char or applies the font size
       if(!val) textWidth += incrementVal ? incrementVal : 21;
       else {
-        // TODO ensure the values are correct. font size is correct etc (*REQUIRES FIX).
         // Calulate and increment the width.
-        // incrementVal = Math.round(googleFontData[char] * (rootPixelSize * 1.3/10));  
         incrementVal = (shortestInLength/100) * (googleFontData[char]/3.5);
         textWidth += incrementVal;
       }
     });
     // add space for avatar
     textWidth += rootPixelSize * 1.5;
-    // TODO REQUIRES FIX: The text width is not accurate
-    // this could be because of the following:
-    // a: The googleFontData is incorrect
-    // b: calculation below is incorrect
     const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
     const imgPadding = rootPixelSize * 0.15; // padding top / left for image
-    const autographFontSize = rootPixelSize * 1.1; // TODO FIX (*REQUIRES FIX)
+    const autographFontSize = rootPixelSize * 1.1;
     // build label templates
     labelTemplates += `
       <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
