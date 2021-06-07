@@ -200,17 +200,19 @@ module.exports = async (
         // TODO ensure the values are correct. font size is correct etc (*REQUIRES FIX).
         // Calulate and increment the width.
         // incrementVal = Math.round(googleFontData[char] * (rootPixelSize * 1.3/10));  
-        incrementVal = (shortestInLength/100) * (googleFontData[char]/3);
+        incrementVal = (shortestInLength/100) * (googleFontData[char]/3.5);
         textWidth += incrementVal;
       }
     });
+    // add space for avatar
+    textWidth += rootPixelSize * 1.5;
     // TODO REQUIRES FIX: The text width is not accurate
     // this could be because of the following:
     // a: The googleFontData is incorrect
     // b: calculation below is incorrect
     const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
     const imgPadding = rootPixelSize * 0.15; // padding top / left for image
-    const autographFontSize = Math.round(rootPixelSize * 1.1); // TODO FIX (*REQUIRES FIX)
+    const autographFontSize = rootPixelSize * 1.1; // TODO FIX (*REQUIRES FIX)
     // build label templates
     labelTemplates += `
       <svg class="label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
@@ -233,7 +235,7 @@ module.exports = async (
   // "More..." Label
   if (data.length > 3) {
     const labelHeight = rootPixelSize * 1.7;
-    const autographFontSize = Math.round(rootPixelSize * 1.1);
+    const autographFontSize = rootPixelSize * 1.1;
     const yPos = imgH - labelHeight * 1.7; 
     const maxLabelTemplate = `
       <svg class="label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - (autographFontSize * 6.5)) - (outerMargin)}" y="${yPos}">

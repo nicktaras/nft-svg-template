@@ -129,15 +129,15 @@ svg {
         </text>
       </g>
       <svg class="timestamp" xmlns="http://www.w3.org/2000/svg" style="fill: white; font-family: 'Source Code Pro'">
-        <text transform="rotate(90)" x="20.650000000000002" y="-519.025" font-size="16.52">17654321.4JUN2021</text>
+        <text transform="rotate(90)" x="20.650000000000002" y="-519.025" font-size="16.52">17654321.7JUN2021</text>
       </svg>
       <svg class="status" xmlns="http://www.w3.org/2000/svg" style="fill: white; font-family: 'Source Code Pro'" x="476.486" y="206.5">
         <text x="0" y="52.864000000000004" font-size="13.216000000000001">Signed:</text>
       </svg>
       <g class="label-container">
-      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="299.360625" y="334.3648">
-        <rect x="0" y="0" width="229.989375" height="28.084" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
-        <text style="font-family: 'Barlow'; fill:white;" font-size="18">
+      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="308.17847000000006" y="334.3648">
+        <rect x="0" y="0" width="221.17153" height="28.084" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
+        <text style="font-family: 'Barlow'; fill:white;" font-size="18.172">
             <tspan x="29.736" y="19.823999999999998">@eth.765239059646909</tspan>
         </text>
         <svg x="2.4779999999999998" y="2.4779999999999998" width="23.127999999999997" height="23.127999999999997">
@@ -150,9 +150,9 @@ svg {
           </svg>
       </svg>
     
-      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="311.57854166666675" y="303.4724">
-        <rect x="0" y="0" width="217.7714583333333" height="28.084" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
-        <text style="font-family: 'Barlow'; fill:white;" font-size="18">
+      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="318.5247100000001" y="303.4724">
+        <rect x="0" y="0" width="210.82528999999994" height="28.084" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
+        <text style="font-family: 'Barlow'; fill:white;" font-size="18.172">
             <tspan x="29.736" y="19.823999999999998">@alphaWallet.0987643</tspan>
         </text>
         <svg x="2.4779999999999998" y="2.4779999999999998" width="23.127999999999997" height="23.127999999999997">
@@ -165,9 +165,9 @@ svg {
           </svg>
       </svg>
     
-      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="326.46375" y="272.58">
-        <rect x="0" y="0" width="202.88625" height="28.084" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
-        <text style="font-family: 'Barlow'; fill:white;" font-size="18">
+      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="331.30706000000004" y="272.58">
+        <rect x="0" y="0" width="198.04294" height="28.084" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
+        <text style="font-family: 'Barlow'; fill:white;" font-size="18.172">
             <tspan x="29.736" y="19.823999999999998">@Beeple.1234567890</tspan>
         </text>
         <svg x="2.4779999999999998" y="2.4779999999999998" width="23.127999999999997" height="23.127999999999997">
@@ -180,10 +180,10 @@ svg {
           </svg>
       </svg>
     
-      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="412.35" y="365.2572">
+      <svg class="label" xmlns="http://www.w3.org/2000/svg" x="411.232" y="365.2572">
         <g>
-          <rect x="0" y="0" width="117" height="28.084" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
-          <text style="font-family: 'Barlow'; fill:white;" font-size="18">
+          <rect x="0" y="0" width="118.11800000000001" height="28.084" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
+          <text style="font-family: 'Barlow'; fill:white;" font-size="18.172">
             <tspan x="3.3040000000000003" y="19.823999999999998">AND 1 MORE...</tspan>
           </text>
         </g>
