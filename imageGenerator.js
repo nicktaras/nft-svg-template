@@ -116,8 +116,9 @@ module.exports = async (
     rootPixelSize = shortestInLength / 16 * 0.64;
 
     // Apply Calculation (height / width)
-    $('.autograph-nft-wrapper').css({ height: imgH, width: imgW });
-    $('.autograph-nft-wrapper').attr({ 'viewBox': `0 0 ${imgW} ${imgH}` });
+    $('.autograph-nft-wrapper')
+    .css({ height: imgH, width: imgW })
+    .attr({ 'viewBox': `0 0 ${imgW} ${imgH}` });
 
     // 5% outer margin
     outerMargin = shortestInLength * 0.05;
@@ -194,8 +195,7 @@ module.exports = async (
         textWidth += incrementVal;
       }
     });
-    // add space for avatar
-    textWidth += rootPixelSize * 1.5;
+    textWidth += rootPixelSize * 1.5; // add space for avatar
     const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
     const imgPadding = rootPixelSize * 0.15; // padding top / left for image
     const autographFontSize = rootPixelSize * 1.1;
@@ -262,20 +262,12 @@ module.exports = async (
   if (data[0].title.toUpperCase().startsWith("SIGNED")) {
     $('.not-signed').remove();
   };
+
+  // template with remixed data
+  let output = $('.autograph-nft-wrapper').eq(0);
   
   // SVG
   if (contentType.indexOf("svg") > -1) {
-    // prepare output
-    const removeList = [
-      "<html><head></head><body>",
-      "</body></html>"
-    ];
-    // output is SVG wrapped in html
-    let output = $.html();
-    // remove the outer html wrapper
-    removeList.map((item) => {
-      output = output.replace(item, "");
-    });
     // get SVG image buffer
     imageBuffer = await svg2png({
       input: output,
@@ -296,16 +288,16 @@ module.exports = async (
   });
 
   // Define if the colour theme for text is black or white.
-  const colourTheme = isLightImage ? "black" : "white";
-  const labelbackgroundCRBGA = isLightImage ? "black" : "white";
+  const fontColourTheme = isLightImage ? "black" : "white";
+  const labelBackgroundColourTheme = isLightImage ? "black" : "white";
   // apply white / black colour theme
   $('.autograph-nft-label rect, .autograph-nft-not-signed rect')
   .css({ 
-    'fill': labelbackgroundCRBGA 
+    'fill': labelBackgroundColourTheme 
   });
   $('.autograph-nft-label text tspan, .autograph-nft-not-signed text tspan, .autograph-nft-status text, .autograph-nft-timestamp text')
   .attr({
-    'fill': colourTheme 
+    'fill': fontColourTheme 
   });
   
   // prepare output
@@ -315,7 +307,7 @@ module.exports = async (
   ];
 
   // output is SVG wrapped in html
-  let output = $.html();
+  output = $.html();
 
   // remove the outer html wrapper
   removeList.map((item) => {
