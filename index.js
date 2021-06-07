@@ -13,7 +13,7 @@ const imageGenerator = require("./imageGenerator");
 // ],
 // base64Encode
 
-const format = 'svg';
+const format = 'png';
  
 imageGenerator(
   "https://media-cdn.tripadvisor.com/media/photo-s/1a/dd/6a/f0/paradise-taveuni.jpg",
