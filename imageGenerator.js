@@ -12,7 +12,6 @@ const googleFontData = require('./googleFontData');
 
 // Autograph Templates
 const template = require("./htmlTemplates/labelled_autograph_template");
-const { fontsize } = require('./htmlTemplates/labelled_autograph_template');
 
 /*
   FUNCTION:
@@ -187,17 +186,17 @@ module.exports = async (
     
     //
     let labelMaker = ''; 
-    let startPos = rootPixelSize * 1.7; 
+    let startPosX = rootPixelSize * 1.7; 
     textWidth = 0;
         
     // e.g. [@,B,e,e,p,l,e,.,3,4,6,4,6,6,5,6,4]
-    label.name.match(/./g).concat(['.']).concat(label.twitterId.match(/./g)).map((char, index) => {
+    [...label.name.match(/./g),...['.'], ...label.twitterId.match(/./g)].map(char => {
 
       const val = googleFontData[char];
-      
+
       labelMaker += `
         <tspan
-          x="${startPos + textWidth}"
+          x="${startPosX + textWidth}"
           y="${rootPixelSize * 1.2}"
           width=${val}
         >
@@ -205,6 +204,7 @@ module.exports = async (
         </tspan>
       `;
 
+      // adjust for spacing between letters
       textWidth += (val * (rootPixelSize * 0.065));
 
     });

@@ -132,7 +132,7 @@
           <text transform="rotate(90)" x="20.650000000000002" y="-519.025" font-size="16.52" fill="white">17654321.7JUN2021</text>
         </svg>
         <svg class="autograph-nft-status" xmlns="http://www.w3.org/2000/svg" style="fill: white; font-family: 'Source Code Pro'" x="443.446" y="206.5">
-          <text x="0" y="52.864000000000004" font-size="13.216000000000001" fill="white">Requesting:</text>
+          <text x="0" y="52.864000000000004" font-size="13.216000000000001" fill="white">Requesting</text>
         </svg>
         <g class="autograph-nft-label-container">
       <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="245.52235799999997" y="334.3648">
@@ -266,8 +266,8 @@
         </svg>
       </svg>
     
-      <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="457.96509760000004" y="303.4724">
-        <rect x="0" y="0" width="71.38490239999999" height="28.084" style="fill: white;" fill-opacity="0.5" rx="2"></rect>
+      <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="198.43085899999997" y="303.4724">
+        <rect x="0" y="0" width="330.919141" height="28.084" style="fill: white;" fill-opacity="0.5" rx="2"></rect>
         <text style="font-family: 'Barlow'; fill:white;" font-size="18.172">
             <tspan x="29.736" y="19.823999999999998" fill="white">
         <tspan x="28.084" y="19.823999999999998" width="13.2315" fill="white">
@@ -278,15 +278,135 @@
           c
         </tspan>
       
-        <tspan x="51.1744583" y="19.823999999999998" width="4.4485" fill="white">
+        <tspan x="51.1744583" y="19.823999999999998" width="5.824" fill="white">
+          r
+        </tspan>
+      
+        <tspan x="57.4282695" y="19.823999999999998" width="7.376" fill="white">
+          y
+        </tspan>
+      
+        <tspan x="65.3486183" y="19.823999999999998" width="8.8315" fill="white">
+          p
+        </tspan>
+      
+        <tspan x="74.831883" y="19.823999999999998" width="5.824" fill="white">
+          t
+        </tspan>
+      
+        <tspan x="81.0856942" y="19.823999999999998" width="8.72" fill="white">
+          o
+        </tspan>
+      
+        <tspan x="90.4492302" y="19.823999999999998" width="8.8315" fill="white">
+          p
+        </tspan>
+      
+        <tspan x="99.93249490000001" y="19.823999999999998" width="8.576" fill="white">
+          u
+        </tspan>
+      
+        <tspan x="109.14140370000001" y="19.823999999999998" width="8.624" fill="white">
+          n
+        </tspan>
+      
+        <tspan x="118.40185490000002" y="19.823999999999998" width="8.016" fill="white">
+          k
+        </tspan>
+      
+        <tspan x="127.00943570000001" y="19.823999999999998" width="7.457999999999999" fill="white">
+          s
+        </tspan>
+      
+        <tspan x="135.0178361" y="19.823999999999998" width="8.72" fill="white">
+          b
+        </tspan>
+      
+        <tspan x="144.3813721" y="19.823999999999998" width="8.72" fill="white">
+          o
+        </tspan>
+      
+        <tspan x="153.7449081" y="19.823999999999998" width="5.824" fill="white">
+          t
+        </tspan>
+      
+        <tspan x="159.9987193" y="19.823999999999998" width="4.4485" fill="white">
           .
         </tspan>
       
-        <tspan x="55.951257600000005" y="19.823999999999998" width="5.648" fill="white">
+        <tspan x="164.7755186" y="19.823999999999998" width="5.648" fill="white">
           1
         </tspan>
       
-        <tspan x="62.01608" y="19.823999999999998" width="5.648" fill="white">
+        <tspan x="170.840341" y="19.823999999999998" width="5.648" fill="white">
+          1
+        </tspan>
+      
+        <tspan x="176.9051634" y="19.823999999999998" width="8.816" fill="white">
+          4
+        </tspan>
+      
+        <tspan x="186.37178419999998" y="19.823999999999998" width="8.224" fill="white">
+          5
+        </tspan>
+      
+        <tspan x="195.2027154" y="19.823999999999998" width="8.816" fill="white">
+          4
+        </tspan>
+      
+        <tspan x="204.66933619999998" y="19.823999999999998" width="9.04" fill="white">
+          0
+        </tspan>
+      
+        <tspan x="214.37648819999998" y="19.823999999999998" width="8.24" fill="white">
+          3
+        </tspan>
+      
+        <tspan x="223.2246002" y="19.823999999999998" width="8.24" fill="white">
+          6
+        </tspan>
+      
+        <tspan x="232.0727122" y="19.823999999999998" width="8.24" fill="white">
+          6
+        </tspan>
+      
+        <tspan x="240.92082420000003" y="19.823999999999998" width="8.336" fill="white">
+          8
+        </tspan>
+      
+        <tspan x="249.87202100000002" y="19.823999999999998" width="8.336" fill="white">
+          9
+        </tspan>
+      
+        <tspan x="258.8232178" y="19.823999999999998" width="8.816" fill="white">
+          4
+        </tspan>
+      
+        <tspan x="268.2898386" y="19.823999999999998" width="8.224" fill="white">
+          5
+        </tspan>
+      
+        <tspan x="277.1207698" y="19.823999999999998" width="8.336" fill="white">
+          9
+        </tspan>
+      
+        <tspan x="286.0719666" y="19.823999999999998" width="8.336" fill="white">
+          8
+        </tspan>
+      
+        <tspan x="295.0231634" y="19.823999999999998" width="8.24" fill="white">
+          6
+        </tspan>
+      
+        <tspan x="303.8712754" y="19.823999999999998" width="8.224" fill="white">
+          5
+        </tspan>
+      
+        <tspan x="312.7022066" y="19.823999999999998" width="8.24" fill="white">
+          6
+        </tspan>
+      
+        <tspan x="321.5503186" y="19.823999999999998" width="5.648" fill="white">
           1
         </tspan>
       </tspan>
@@ -301,8 +421,8 @@
         </svg>
       </svg>
     
-      <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="402.8152665" y="272.58">
-        <rect x="0" y="0" width="126.53473350000002" height="28.084" style="fill: white;" fill-opacity="0.5" rx="2"></rect>
+      <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="353.59227450000003" y="272.58">
+        <rect x="0" y="0" width="175.75772550000002" height="28.084" style="fill: white;" fill-opacity="0.5" rx="2"></rect>
         <text style="font-family: 'Barlow'; fill:white;" font-size="18.172">
             <tspan x="29.736" y="19.823999999999998" fill="white">
         <tspan x="28.084" y="19.823999999999998" width="13.2315" fill="white">
@@ -337,12 +457,32 @@
           .
         </tspan>
       
-        <tspan x="108.95348870000001" y="19.823999999999998" width="5.696000000000001" fill="white">
-          f
+        <tspan x="108.95348870000001" y="19.823999999999998" width="8.224" fill="white">
+          5
         </tspan>
       
-        <tspan x="115.06985350000001" y="19.823999999999998" width="7.6" fill="white">
-          v
+        <tspan x="117.7844199" y="19.823999999999998" width="8.816" fill="white">
+          4
+        </tspan>
+      
+        <tspan x="127.2510407" y="19.823999999999998" width="9.04" fill="white">
+          0
+        </tspan>
+      
+        <tspan x="136.9581927" y="19.823999999999998" width="8.24" fill="white">
+          3
+        </tspan>
+      
+        <tspan x="145.8063047" y="19.823999999999998" width="8.24" fill="white">
+          6
+        </tspan>
+      
+        <tspan x="154.6544167" y="19.823999999999998" width="8.24" fill="white">
+          6
+        </tspan>
+      
+        <tspan x="163.50252870000003" y="19.823999999999998" width="8.336" fill="white">
+          8
         </tspan>
       </tspan>
         </text>
