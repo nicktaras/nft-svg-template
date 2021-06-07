@@ -1,6 +1,7 @@
 const cheerio = require('cheerio');
-
-// convert
+const svg64 = require('svg64');
+const fetch = require('node-fetch');
+const sizeOf = require('image-size');
 const svg2png = require('svg-png-converter').svg2png;
 
 // lib to detect image contrast returning if image is light or dark
@@ -9,13 +10,8 @@ const isLightContrastImage = require('./isLightContrastImage');
 // Reads the Barlow Font widths (needed to correctly calculate width of labels)
 const googleFontData = require('./googleFontData');
 
-// Enable for SVG to be converted to Base64
-const svg64 = require('svg64');
-const fetch = require('node-fetch');
-const sizeOf = require('image-size');
-
-// SVG Template
-const template = require("./htmlTemplates/SVG-Template-Test-Output");
+// Autograph Templates
+const template = require("./htmlTemplates/labelled_autograph_template");
 
 /*
   FUNCTION:
@@ -50,10 +46,10 @@ module.exports = async (
   let imgH,          // Height of Remix NFT
       imgW,          // Width of Remix NFT
       imageBuffer,   // Image buffer (png, gif, jpg)
-      svgMargin,     // Scale based value that can be used to scale text/elements to the NFT
       rootPixelSize, // Base font size calculated by the scale of the longest length of the image
       lastLabelYPos, // Used to apply the labels to the NFT + the Signed/Requested text
-      outerMargin;   // percent based margin (will be calculated to be 5%)
+      outerMargin,   // percent based margin (will be calculated to be 5%)
+      output         // return data
   
   // load SVG template
   const $ = cheerio.load(template);
@@ -121,11 +117,9 @@ module.exports = async (
     rootPixelSize = shortestInLength / 16 * 0.64;
 
     // Apply Calculation (height / width)
-    $('.autograph-nft-wrapper').css({ height: imgH, width: imgW });
-    $('.autograph-nft-wrapper').attr({ 'viewBox': `0 0 ${imgW} ${imgH}` });
-
-    // common margin 
-    svgMargin = rootPixelSize * 3;
+    $('.autograph-nft-wrapper')
+    .css({ height: imgH, width: imgW })
+    .attr({ 'viewBox': `0 0 ${imgW} ${imgH}` });
 
     // 5% outer margin
     outerMargin = shortestInLength * 0.05;
@@ -145,8 +139,8 @@ module.exports = async (
     $('.autograph-nft-not-signed rect').attr({ 
       "x": outerMargin,
       "y": outerMargin,
-      "width": svgMargin * 3.7, 
-      "height": svgMargin * 1.2 
+      "width": rootPixelSize * 11, 
+      "height": rootPixelSize * 3.65
     });
     // Timestamp positioning
     $('.autograph-nft-timestamp text').attr({ 
@@ -167,17 +161,14 @@ module.exports = async (
   // Apply Status
   $('.autograph-nft-status text').eq(0).text(`${data[0].title}`);
 
-  // Apply Labels
-  let labelTemplates = '';
-  
-  // add labels
-  let incrementVal;
-
   // Collect the last three labels (upto 3 will be shown in the view)
   let labelData = data.slice(0, 3);
 
   // Reverse order to build the labels up the NFT (last to first)
   labelData = labelData.reverse();
+
+  // Apply Labels
+  let labelTemplates = '';
 
   labelData.map((label, index) => {
 
@@ -190,29 +181,46 @@ module.exports = async (
     let addOuterMargin = data.length <= 3 ? outerMargin : 0;
     const yPos = imgH - labelHeight - labelPositionByIndex - offset - addOuterMargin;
     
+    // Placeholder to build SVG label text 
+    let autographSVGText = ''; 
+    // Start position beside the Twitter profile image
+    let startPosX = rootPixelSize * 1.7; 
+    // Text width (incremented as the letters are defined in SVG)
+    textWidth = 0;
+        
     // e.g. [@,B,e,e,p,l,e,.,3,4,6,4,6,6,5,6,4]
-    label.name.match(/./g).concat(['.']).concat(label.twitterId.match(/./g)).map(char => {
+    [...label.name.match(/./g),...['.'], ...label.twitterId.match(/./g)].map(char => {
+
       const val = googleFontData[char];
-      // default if char not found e.g. Special Char (fall back)
-      // Applies the last disovered char or applies the font size
-      if(!val) textWidth += incrementVal ? incrementVal : 21;
-      else {
-        // Calulate and increment the width.
-        incrementVal = (shortestInLength/100) * (googleFontData[char]/3.5);
-        textWidth += incrementVal;
-      }
+
+      autographSVGText += `
+        <tspan
+          x="${startPosX + textWidth}"
+          y="${rootPixelSize * 1.2}"
+          width=${val}
+        >
+          ${char}
+        </tspan>
+      `;
+
+      // adjust for spacing between letters
+      textWidth += (val * (rootPixelSize * 0.065));
+
     });
-    // add space for avatar
-    textWidth += rootPixelSize * 1.5;
+
+    const twitterIdProfileWidth = rootPixelSize * 1.9; // width of twitter image with margin left/right
     const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
     const imgPadding = rootPixelSize * 0.15; // padding top / left for image
     const autographFontSize = rootPixelSize * 1.1;
+
+    textWidth += twitterIdProfileWidth;
+
     // build label templates
     labelTemplates += `
       <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
         <rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
         <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
-            <tspan x="${rootPixelSize * 1.8}" y="${rootPixelSize * 1.2}">${label.name}.${label.twitterId}</tspan>
+          ${autographSVGText}
         </text>
         <svg x="${imgPadding}" y="${imgPadding}" width="${twitterImageWidth}" height="${twitterImageWidth}">
           <defs>
@@ -221,11 +229,12 @@ module.exports = async (
             </clipPath>
           </defs>
           <image width="${twitterImageWidth}" height="${twitterImageWidth}" clip-path="url(#myCircle)" />
-          </svg>
+        </svg>
       </svg>
     `;
     lastLabelYPos = yPos;
   });
+  
   // "More..." Label
   if (data.length > 3) {
     const labelHeight = rootPixelSize * 1.7;
@@ -270,20 +279,11 @@ module.exports = async (
   if (data[0].title.toUpperCase().startsWith("SIGNED")) {
     $('.not-signed').remove();
   };
-  
+
   // SVG
   if (contentType.indexOf("svg") > -1) {
-    // prepare output
-    const removeList = [
-      "<html><head></head><body>",
-      "</body></html>"
-    ];
-    // output is SVG wrapped in html
-    let output = $.html();
-    // remove the outer html wrapper
-    removeList.map((item) => {
-      output = output.replace(item, "");
-    });
+    // template with remixed data
+    output = $('.autograph-nft-wrapper').eq(0);
     // get SVG image buffer
     imageBuffer = await svg2png({
       input: output,
@@ -304,16 +304,16 @@ module.exports = async (
   });
 
   // Define if the colour theme for text is black or white.
-  const colourTheme = isLightImage ? "black" : "white";
-  const labelbackgroundCRBGA = isLightImage ? "black" : "white";
+  const fontColourTheme = isLightImage ? "black" : "white";
+  const labelBackgroundColourTheme = isLightImage ? "black" : "white";
   // apply white / black colour theme
   $('.autograph-nft-label rect, .autograph-nft-not-signed rect')
   .css({ 
-    'fill': labelbackgroundCRBGA 
+    'fill': labelBackgroundColourTheme 
   });
   $('.autograph-nft-label text tspan, .autograph-nft-not-signed text tspan, .autograph-nft-status text, .autograph-nft-timestamp text')
   .attr({
-    'fill': colourTheme 
+    'fill': fontColourTheme 
   });
   
   // prepare output
@@ -323,7 +323,7 @@ module.exports = async (
   ];
 
   // output is SVG wrapped in html
-  let output = $.html();
+  output = $.html();
 
   // remove the outer html wrapper
   removeList.map((item) => {
