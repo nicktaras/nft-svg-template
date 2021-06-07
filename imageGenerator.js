@@ -220,7 +220,7 @@ module.exports = async (
       <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
         <rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
         <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
-            <tspan x="${rootPixelSize * 1.8}" y="${rootPixelSize * 1.2}">${autographSVGText}</tspan>
+          ${autographSVGText}
         </text>
         <svg x="${imgPadding}" y="${imgPadding}" width="${twitterImageWidth}" height="${twitterImageWidth}">
           <defs>
