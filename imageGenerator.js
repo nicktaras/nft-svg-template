@@ -218,7 +218,7 @@ module.exports = async (
     // build label templates
     labelTemplates += `
       <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
-        <rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
+        <rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="black" fill-opacity="0.3" rx="2"></rect>
         <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
           ${autographSVGText}
         </text>
@@ -243,7 +243,7 @@ module.exports = async (
     const maxLabelTemplate = `
       <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - (autographFontSize * 6.5)) - (outerMargin)}" y="${yPos}">
         <g>
-          <rect x="0" y="0" width="${autographFontSize * 6.5}" height="${labelHeight}" style="fill:rgb(255,255,255)" fill-opacity="0.5" rx="2"></rect>
+          <rect x="0" y="0" width="${autographFontSize * 6.5}" height="${labelHeight}" style="fill:rgb(255,255,255)" fill-opacity="0.24" rx="2"></rect>
           <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
             <tspan x="${rootPixelSize * 0.2}" y="${rootPixelSize * 1.2}">AND ${data.length -3} MORE...</tspan>
           </text>
@@ -311,7 +311,7 @@ module.exports = async (
   .css({ 
     'fill': labelBackgroundColourTheme 
   });
-  $('.autograph-nft-label text tspan, .autograph-nft-not-signed text tspan, .autograph-nft-status text, .autograph-nft-timestamp text')
+  $('.autograph-nft-status text, .autograph-nft-timestamp text')
   .attr({
     'fill': fontColourTheme 
   });
