@@ -32,10 +32,11 @@ const template = require("./htmlTemplates/SVG-Template-Test-Output");
       photoURL: string; (Photo of Twitter User)
       name: string; (Name of Twitter User)
       twitterId: string; (Handle)
-      mark: string; (ID number)
+      mark: string; (Like: 1507.27FEB2021)
     }
     ],
-    base64Encode
+    base64Encode,
+    format ('svg' or 'png')
   }
 */
 
@@ -265,9 +266,9 @@ module.exports = async (
   $('.autograph-nft-status').attr({ "x": xPosStatus, "y": lastLabelYPos - rootPixelSize * 4 });
   $('.autograph-nft-status text').attr({ "font-size": rootPixelSize * 0.8, "y": rootPixelSize * 3.2 });
   
-  // Remove the 'not signed label' when signed view
-  if (data[0].title.toUpperCase() === "SIGNED") {
-    $('.autograph-nft-not-signed').remove();
+  // remove the 'not signed label' when signed view
+  if (data[0].title.toUpperCase().startsWith("SIGNED")) {
+    $('.not-signed').remove();
   };
   
   // SVG
