@@ -123,7 +123,7 @@ module.exports = `
           <image class="autograph-nft-image" x="0" y="0" href=""></image>
         </svg>
         <g class="autograph-nft-not-signed">
-          <rect x="32" y="32" width="160" height="60" style="fill: white" fill-opacity="0.5" rx="2"></rect>
+          <rect x="32" y="32" width="160" height="60" style="fill: black" fill-opacity="0.4" rx="2"></rect>
           <text style="font-family: 'Barlow'; fill: white; font-style: italic;">
             <tspan>Not Signed</tspan>
             <tspan>Ongoing Offer!</tspan>
