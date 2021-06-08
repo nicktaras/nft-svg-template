@@ -281,7 +281,7 @@ module.exports = async (
   
   // remove the 'not signed label' when signed view
   if (data[0].title.toUpperCase().startsWith("SIGNED")) {
-    $('.not-signed').remove();
+    $('.autograph-nft-not-signed').remove();
   };
 
   // SVG

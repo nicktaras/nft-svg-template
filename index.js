@@ -33,8 +33,8 @@ imageGenerator(
     {
       title: "Requesting",
       photoURL: "https://pbs.twimg.com/profile_images/264316321/beeple_headshot_beat_up_400x400.jpg",
-      name: "@BEEPLE",
-      twitterId: "5403668",
+      name: "@weihong_hu",
+      twitterId: "1385403298945986561",
       mark: "17654321"
     },
     {
