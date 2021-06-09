@@ -69,6 +69,10 @@ const detect = async ({
   } catch (e) {
       console.log('Something went wrong:', e);
   }
+
+  // fall back allowing the application to generate image
+  if(!result || !result[0] || !result[0].palette) return "#ffffff";
+
   return result[0].palette;
 }
 

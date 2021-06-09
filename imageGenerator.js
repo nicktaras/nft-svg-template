@@ -2,8 +2,7 @@ const cheerio = require('cheerio');
 const svg64 = require('svg64');
 const fetch = require('node-fetch');
 const sizeOf = require('image-size');
-const svg2png = require('svg-png-converter').svg2png;
-
+const sharp = require('sharp');
 // lib to detect image contrast returning if image is light or dark
 const isLightContrastImage = require('./isLightContrastImage');
 
@@ -66,6 +65,10 @@ module.exports = async (
     // get SVG element from response
     const svgUrlData = await imageUrlData.text();
 
+    // get buffer for processing
+    const svgBuffer = Buffer.from(svgUrlData);
+    imageBuffer = await sharp(svgBuffer).toBuffer('png');
+    
     // Original NFT
     const svgEl = $(svgUrlData);
     const svgViewBox = svgEl.attr('viewBox');
@@ -260,18 +263,6 @@ module.exports = async (
     $('.autograph-nft-not-signed').remove();
   };
 
-  // SVG
-  if (contentType.indexOf("svg") > -1) {
-    // template with remixed data
-    output = $('.autograph-nft-wrapper').eq(0);
-    // get SVG image buffer
-    imageBuffer = await svg2png({
-      input: output,
-      encoding: 'buffer',
-      format: 'png',
-    });
-  }
-
   // can be increased at the cost of performance
   const imageArea = 5;
   let isLightImage = true;
@@ -315,11 +306,8 @@ module.exports = async (
 
   // define image data return type
   if (format.toUpperCase() === 'PNG') {
-    const pngOutput = await svg2png({
-      input: output,
-      encoding: base64Encode ? 'dataURL' : 'buffer',
-      format: 'png',
-    });
+    const svgToBuffer = Buffer.from(output);
+    const pngOutput = await sharp(svgToBuffer).toBuffer('png');
     output = pngOutput;
   }
   
