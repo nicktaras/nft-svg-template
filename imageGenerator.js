@@ -185,7 +185,6 @@ module.exports = async (
     let autographSVGText = ''; 
     // Start position beside the Twitter profile image
     let startPosX = rootPixelSize * 1.7; 
-    if(format.toUpperCase().startsWith("PNG")) startPosX = -(rootPixelSize * 0.95); // Adjust if PNG
 
     // Text width (incremented as the letters are defined in SVG)
     textWidth = 0;
@@ -197,15 +196,7 @@ module.exports = async (
 
       if(!val) val = googleFontData[1];
 
-      autographSVGText += `
-        <tspan
-          x="${startPosX + textWidth}"
-          y="${rootPixelSize * 1.2}"
-          width=${val}
-        >
-          ${char}
-        </tspan>
-      `;
+      autographSVGText += `<tspan font-size-adjust="${rootPixelSize * 0.03}" x="${startPosX + textWidth}" y="${rootPixelSize * 1.2}" width=${val}>${char}</tspan>`;
 
       // adjust for spacing between letters
       textWidth += (val * (rootPixelSize * 0.065));
@@ -220,22 +211,7 @@ module.exports = async (
     textWidth += twitterIdProfileWidth;
 
     // build label templates
-    labelTemplates += `
-      <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}">
-        <rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="black" fill-opacity="0.3" rx="2"></rect>
-        <text x="0" y="0" style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
-          ${autographSVGText}
-        </text>
-        <svg x="${imgPadding}" y="${imgPadding}" width="${twitterImageWidth}" height="${twitterImageWidth}">
-          <defs>
-            <clipPath id="myCircle">
-              <circle cx="${twitterImageWidth/2}" cy="${twitterImageWidth/2}" r="${twitterImageWidth/2}" fill="#FFFFFF" />
-            </clipPath>
-          </defs>
-          <image width="${twitterImageWidth}" height="${twitterImageWidth}" clip-path="url(#myCircle)" />
-        </svg>
-      </svg>
-    `;
+    labelTemplates += `<svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${(imgW - textWidth) - (outerMargin)}" y="${yPos}"><rect x="0" y="0" width="${textWidth}" height="${rootPixelSize * 1.7}" style="black" fill-opacity="0.3" rx="2"></rect><text x="0" y="0" style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">${autographSVGText}</text><svg x="${imgPadding}" y="${imgPadding}" width="${twitterImageWidth}" height="${twitterImageWidth}"><defs><clipPath id="myCircle"><circle cx="${twitterImageWidth/2}" cy="${twitterImageWidth/2}" r="${twitterImageWidth/2}" fill="#FFFFFF" /></clipPath></defs><image width="${twitterImageWidth}" height="${twitterImageWidth}" clip-path="url(#myCircle)" /></svg></svg>`;
     lastLabelYPos = yPos;
   });
   

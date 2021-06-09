@@ -14,7 +14,7 @@ const imageGenerator = require("./imageGenerator");
 // base64Encode,
 // format
 
-const format = 'png';
+const format = 'svg';
  
 imageGenerator(
   "https://media-cdn.tripadvisor.com/media/photo-s/1a/dd/6a/f0/paradise-taveuni.jpg",
@@ -31,7 +31,7 @@ imageGenerator(
   // "https://storage.opensea.io/files/0fbeacdb0bf089800109f3b1d0401c6b.svg",
   [
     {
-      title: "Requesting",
+      title: "Signed:",
       photoURL: "https://pbs.twimg.com/profile_images/264316321/beeple_headshot_beat_up_400x400.jpg",
       name: "@weihong_hu",
       twitterId: "1385403298945986561",
