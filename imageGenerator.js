@@ -97,7 +97,15 @@ module.exports = async (
 
   // Image types; PNG, JPG, Gif: assign height and width to imgW, imgH.
   if (contentType.indexOf("svg") <= -1) {
+
     imageBuffer = await imageUrlData.buffer();
+
+    // Fix for Linux to convert gif to PNG
+    if (contentType.indexOf("gif") > -1 && format.toUpperCase() === "PNG") {
+      const gifToPngBuffer = await sharp(imageBuffer).toBuffer('png');
+      imageBuffer = gifToPngBuffer;
+    }
+
     const imageBase64 = `data:image/${contentType};base64,`+imageBuffer.toString('base64');
     const dimensions = sizeOf(imageBuffer);
     imgH = dimensions.height;
