@@ -100,7 +100,7 @@ module.exports = async (
     imageBuffer = await imageUrlData.buffer();
 
     // Fix for Linux to convert gif of Webp to PNG
-    var fallBackTypes = ['image/gif', 'image/png'];
+    var fallBackTypes = ['image/gif', 'image/webp'];
     var isFallBackImage = fallBackTypes.includes(contentType);
     // convert fall back image to PNG
     if (isFallBackImage && format.toUpperCase() === "PNG") {
