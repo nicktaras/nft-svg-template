@@ -1,16 +1,16 @@
 const cheerio = require('cheerio');
 const svg64 = require('svg64');
-const recursiveFetch = require('./recursiveFetch');
 const sizeOf = require('image-size');
 const sharp = require('sharp');
-// lib to detect image contrast returning if image is light or dark
-const isLightContrastImage = require('./isLightContrastImage');
+const { v4: uuidv4 } = require('uuid');
 
-// Reads the Barlow Font widths (needed to correctly calculate width of labels)
-const googleFontData = require('./googleFontData');
+// Custom utils/data specific to the image generator
+const isLightContrastImage = require('./utils/isLightContrastImage');
+const recursiveFetch = require('./utils/recursiveFetch');
+const googleFontData = require('./utils/googleFontData');
 
-// Autograph Templates
-const template = require("./htmlTemplates/labelled_autograph_template");
+// SVG template
+const template = require("./templates/labelled_autograph_template");
 
 /*
   FUNCTION:
@@ -49,6 +49,9 @@ module.exports = async (
       lastLabelYPos, // Used to apply the labels to the NFT + the Signed/Requested text
       outerMargin,   // percent based margin (will be calculated to be 5%)
       output         // return data
+
+  // unique id to NFT Remix
+  const uniqueId = uuidv4();
   
   // load SVG template
   const $ = cheerio.load(template);
@@ -104,8 +107,8 @@ module.exports = async (
     var isFallBackImage = fallBackTypes.includes(contentType);
     // convert fall back image to PNG
     if (isFallBackImage && format.toUpperCase() === "PNG") {
-      const gifToPngBuffer = await sharp(imageBuffer).toBuffer('png');
-      imageBuffer = gifToPngBuffer;
+      const fallbackImgToPngBuffer = await sharp(imageBuffer).toBuffer('png');
+      imageBuffer = fallbackImgToPngBuffer;
     }
     // base64 + define width/height from image data
     const imageBase64 = `data:image/${contentType};base64,`+imageBuffer.toString('base64');
@@ -131,32 +134,33 @@ module.exports = async (
 
     // Apply Calculation (height / width)
     $('.autograph-nft-wrapper')
+    .addClass(uniqueId)
     .css({ height: imgH, width: imgW })
     .attr({ 'viewBox': `0 0 ${imgW} ${imgH}` });
 
     // 5% outer margin
     outerMargin = shortestInLength * 0.05;
 
-    $('.autograph-nft-not-signed text tspan').eq(0).attr({ 
+    $(`.${uniqueId} .autograph-nft-not-signed text tspan`).eq(0).attr({ 
       "x": outerMargin * 1.2, 
       "y": (outerMargin) * 2.2, 
       "font-size": rootPixelSize * 1.6 
     });
-    $('.autograph-nft-not-signed text tspan').eq(1).attr({ 
+    $(`.${uniqueId} .autograph-nft-not-signed text tspan`).eq(1).attr({ 
       "x": outerMargin * 1.2, 
       "y": (outerMargin) * 3.5, 
       "font-size": rootPixelSize * 1.6 
     });
 
     // Not Signed Background
-    $('.autograph-nft-not-signed rect').attr({ 
+    $(`.${uniqueId} .autograph-nft-not-signed rect`).attr({ 
       "x": outerMargin,
       "y": outerMargin,
       "width": rootPixelSize * 11, 
       "height": rootPixelSize * 3.65
     });
     // Timestamp positioning
-    $('.autograph-nft-timestamp text').attr({ 
+    $(`.${uniqueId} .autograph-nft-timestamp text`).attr({ 
       "x": outerMargin,
       "y": - (imgW - (outerMargin * 1.5)), 
       "font-size": rootPixelSize * 1 
@@ -164,9 +168,9 @@ module.exports = async (
   }
 
   // Apply Stamp
-  $('.autograph-nft-timestamp text').text(`${data[0].mark}`);
+  $(`.${uniqueId} .autograph-nft-timestamp text`).text(`${data[0].mark}`);
   // Apply Status
-  $('.autograph-nft-status text').eq(0).text(`${data[0].title}`);
+  $(`.${uniqueId} .autograph-nft-status text`).eq(0).text(`${data[0].title}`);
 
   // Collect the last three labels (upto 3 will be shown in the view)
   let labelData = data.slice(0, 3);
@@ -241,15 +245,15 @@ module.exports = async (
   };
   
   // Append all the labels to the Remixed NFT template
-  $('.autograph-nft-label-container').eq(0).append(`${labelTemplates}`);
+  $(`.${uniqueId} .autograph-nft-label-container`).eq(0).append(`${labelTemplates}`);
 
   // Add Twitter Profile Images
   await Promise.all(labelData.map(async (label, index)  => {
-    const imagePhotoURL = await recursiveFetch(imageUrl);(label.photoURL);
+    const imagePhotoURL = await recursiveFetch(label.photoURL);
     const imagePhotoURLBuffer = await imagePhotoURL.buffer();
     const photoURLContentType = await imagePhotoURL.headers.get('content-type');
     imagePhotoURLBase64 = `data:image/${photoURLContentType};base64,`+imagePhotoURLBuffer.toString('base64');
-    $('.autograph-nft-label image').eq(index).attr('href', imagePhotoURLBase64);
+    $(`.${uniqueId} .autograph-nft-label image`).eq(index).attr('href', imagePhotoURLBase64);
   }));
 
   // Status text positioning
@@ -259,12 +263,12 @@ module.exports = async (
   } else { 
     xPosStatus = (imgW - rootPixelSize * 5.2) - (outerMargin); 
   }
-  $('.autograph-nft-status').attr({ "x": xPosStatus, "y": lastLabelYPos - rootPixelSize * 4 });
-  $('.autograph-nft-status text').attr({ "font-size": rootPixelSize * 0.8, "y": rootPixelSize * 3.2 });
+  $(`.${uniqueId} .autograph-nft-status`).attr({ "x": xPosStatus, "y": lastLabelYPos - rootPixelSize * 4 });
+  $(`.${uniqueId} .autograph-nft-status text`).attr({ "font-size": rootPixelSize * 0.8, "y": rootPixelSize * 3.2 });
   
   // remove the 'not signed label' when signed view
   if (data[0].title.toUpperCase().startsWith("SIGNED")) {
-    $('.autograph-nft-not-signed').remove();
+    $(`.${uniqueId} .autograph-nft-not-signed`).remove();
   };
 
   // can be increased at the cost of performance
@@ -282,11 +286,11 @@ module.exports = async (
   const fontColourTheme = isLightImage ? "black" : "white";
   const labelBackgroundColourTheme = isLightImage ? "black" : "white";
   // apply white / black colour theme
-  $('.autograph-nft-label rect, .autograph-nft-not-signed rect')
+  $(`.${uniqueId} .autograph-nft-label rect, .autograph-nft-not-signed rect`)
   .css({ 
     'fill': labelBackgroundColourTheme 
   });
-  $('.autograph-nft-status text, .autograph-nft-timestamp text')
+  $(`.${uniqueId} .autograph-nft-status text, .autograph-nft-timestamp text`)
   .attr({
     'fill': fontColourTheme 
   });

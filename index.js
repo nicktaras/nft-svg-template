@@ -1,5 +1,5 @@
 fs = require('fs');
-const imageGenerator = require("./imageGenerator");
+const imageGenerator = require("./src/imageGenerator");
 
 // imageUrl
 // data: [
@@ -14,10 +14,10 @@ const imageGenerator = require("./imageGenerator");
 // base64Encode,
 // format
 
-const format = 'png';
+const format = 'svg';
 
 imageGenerator(
-  // "https://rinkeby.alchemynft.io/remix/0xcd0fae0847ae40841d1affafd5f9c9a75df86eb7a7c269774d973082311de47d.svg",
+  "https://raw.githubusercontent.com/nicktaras/json_mocks/main/remixNFT.svg",
   // "https://media-cdn.tripadvisor.com/media/photo-s/1a/dd/6a/f0/paradise-taveuni.jpg",
   // "https://images.unsplash.com/photo-1590272456521-1bbe160a18ce?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
   // "https://www.laminex.com.au/medias/p-LX-ColourCollection-Chalk-White-RGB-1200x1200-LR.jpg-1200Wx979H?context=bWFzdGVyfGltYWdlc3wyNzM1OXxpbWFnZS9qcGVnfGgwNS9oYWMvODg2Njg0NTgxODkxMC9wX0xYX0NvbG91ckNvbGxlY3Rpb25fQ2hhbGtfV2hpdGVfUkdCXzEyMDB4MTIwMF9MUi5qcGdfMTIwMFd4OTc5SHxiM2Y1ZGUyYzYxMTc5YjUwMzZkNjA4NjEzZWM3ZDg4YWVjOWM4ZjdhMDNhNTBlYzEyZTc3NmRlOGRlOTFiMzEx",
@@ -29,35 +29,35 @@ imageGenerator(
   // "https://i.pinimg.com/originals/a9/e5/06/a9e506364ae6b6892e6a126a2f021206.gif",
   // "https://polkadot.network/content/images/2020/06/Polkadot_OG.png",
   // "https://storage.opensea.io/files/49a2c73a565c7847c4d2af9a2419990d.svg",
-  "https://storage.opensea.io/files/0fbeacdb0bf089800109f3b1d0401c6b.svg",
+  // "https://storage.opensea.io/files/0fbeacdb0bf089800109f3b1d0401c6b.svg",
   [
     {
-      title: "Signed:",
+      title: "Requested:",
       photoURL: "https://pbs.twimg.com/profile_images/264316321/beeple_headshot_beat_up_400x400.jpg",
       name: "@weihong_hu",
       twitterId: "1385403298945986561",
-      mark: "17654321"
+      mark: "17654321.08JUNE2021"
     },
     {
       title: "Signed",
       photoURL: "https://pbs.twimg.com/profile_images/879737418609553409/yjnyAhAI_400x400.jpg",
       name: "@cryptopunksbot",
       twitterId: "1145403668945986561",
-      mark: "123456"
+      mark: "17654321.08JUNE2021"
     },
     {
       title: "Signed",
       photoURL: "https://pbs.twimg.com/profile_images/1084788308595617793/DOnqq1OM_400x400.jpg",
       name: "@ethereum",
       twitterId: "6919871298945986561",
-      mark: "154321"
+      mark: "17654321.08JUNE2021"
     },
     {
       title: "Signed",
       photoURL: "https://pbs.twimg.com/profile_images/1389823228533739522/-Tj2WF_6_400x400.jpg",
       name: "@Polkadot",
       twitterId: "1385403298945986561",
-      mark: "1154321"
+      mark: "17654321.08JUNE2021"
     },
   ],
   false,
