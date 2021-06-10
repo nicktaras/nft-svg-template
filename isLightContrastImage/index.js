@@ -10,7 +10,11 @@ const Jimp = require('jimp');
   being to determine is white or black text should be overlayed onto the image. 
 
   interface: {
-    imageUrl
+    imageBuffer (image buffer) 
+    x: int (x position)
+    y: int (y position) 
+    dx: int (x end position)
+    dy: int (y end position)
   }
 
   NOTES:
@@ -20,6 +24,12 @@ const Jimp = require('jimp');
 
   At this time the area is fixed, but can be adjusted easily to
   meet new requirements. This function best performs checking a small area of pixels.
+
+  TODO:
+
+  For better detection, break the image into squares (e.g. 20 parts) and test one pixel 
+  per part, to gain an idea of the colour of the pixels across the image for a more
+  accurate reading at the similar compute cost
 
 */
 
