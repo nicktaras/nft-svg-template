@@ -97,15 +97,19 @@ module.exports = async (
 
   // Image types; PNG, JPG, Gif: assign height and width to imgW, imgH.
   if (contentType.indexOf("svg") <= -1) {
-
     imageBuffer = await imageUrlData.buffer();
 
-    // Fix for Linux to convert gif to PNG
-    if (contentType.indexOf("gif") > -1 && format.toUpperCase() === "PNG") {
+    // Fix for Linux to convert gif of Webp to PNG
+    var fallBackTypes = ['gif', 'png'];
+    var isFallBackImage = false;
+    fallBackTypes.map((imgType) => {
+      if (contentType.indexOf(imgType) > -1) isFallBackImage = true;
+    })
+    if (isFallBackImage && format.toUpperCase() === "PNG") {
       const gifToPngBuffer = await sharp(imageBuffer).toBuffer('png');
       imageBuffer = gifToPngBuffer;
     }
-
+    // base64 + define width/height from image data
     const imageBase64 = `data:image/${contentType};base64,`+imageBuffer.toString('base64');
     const dimensions = sizeOf(imageBuffer);
     imgH = dimensions.height;
@@ -161,14 +165,8 @@ module.exports = async (
     }); 
   }
 
-  // build date stamp string
-  var d = new Date();
-  var n = d.getMonth();
-  var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
-  const dateStamp = `${d.getDate()}${months[n]}${d.getFullYear()}`;
-  
   // Apply Stamp
-  $('.autograph-nft-timestamp text').text(`${data[0].mark}.${dateStamp}`);
+  $('.autograph-nft-timestamp text').text(`${data[0].mark}`);
   // Apply Status
   $('.autograph-nft-status text').eq(0).text(`${data[0].title}`);
 
