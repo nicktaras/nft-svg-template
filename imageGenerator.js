@@ -1,6 +1,6 @@
 const cheerio = require('cheerio');
 const svg64 = require('svg64');
-const fetch = require('node-fetch');
+const recursiveFetch = require('./recursiveFetch');
 const sizeOf = require('image-size');
 const sharp = require('sharp');
 // lib to detect image contrast returning if image is light or dark
@@ -59,7 +59,7 @@ module.exports = async (
   var $ = cheerio.load(template); //, { xmlMode: true });
   
   // fetch the NFT Data 
-  const imageUrlData = await fetch(imageUrl);
+  const imageUrlData = await recursiveFetch(imageUrl);
   
   // get Content type
   const contentType = await imageUrlData.headers.get('content-type');
@@ -250,7 +250,7 @@ module.exports = async (
 
   // Add Twitter Profile Images
   await Promise.all(labelData.map(async (label, index)  => {
-    const imagePhotoURL = await fetch(label.photoURL);
+    const imagePhotoURL = await recursiveFetch(label.photoURL);
     const imagePhotoURLBuffer = await imagePhotoURL.buffer();
     const photoURLContentType = await imagePhotoURL.headers.get('content-type');
     imagePhotoURLBase64 = `data:image/${photoURLContentType};base64,`+imagePhotoURLBuffer.toString('base64');
