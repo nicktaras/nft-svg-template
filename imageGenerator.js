@@ -250,7 +250,7 @@ module.exports = async (
 
   // Add Twitter Profile Images
   await Promise.all(labelData.map(async (label, index)  => {
-    const imagePhotoURL = await recursiveFetch(imageUrl);(label.photoURL);
+    const imagePhotoURL = await recursiveFetch(label.photoURL);
     const imagePhotoURLBuffer = await imagePhotoURL.buffer();
     const photoURLContentType = await imagePhotoURL.headers.get('content-type');
     imagePhotoURLBase64 = `data:image/${photoURLContentType};base64,`+imagePhotoURLBuffer.toString('base64');
