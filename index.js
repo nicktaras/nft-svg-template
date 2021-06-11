@@ -14,10 +14,10 @@ const imageGenerator = require("./imageGenerator");
 // base64Encode,
 // format
 
-const format = 'png';
+const format = 'svg';
 
 imageGenerator(
-  // "https://rinkeby.alchemynft.io/remix/0xcd0fae0847ae40841d1affafd5f9c9a75df86eb7a7c269774d973082311de47d.svg",
+  // "https://raw.githubusercontent.com/nicktaras/json_mocks/main/panda-interactive.svg",
   // "https://media-cdn.tripadvisor.com/media/photo-s/1a/dd/6a/f0/paradise-taveuni.jpg",
   // "https://images.unsplash.com/photo-1590272456521-1bbe160a18ce?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
   // "https://www.laminex.com.au/medias/p-LX-ColourCollection-Chalk-White-RGB-1200x1200-LR.jpg-1200Wx979H?context=bWFzdGVyfGltYWdlc3wyNzM1OXxpbWFnZS9qcGVnfGgwNS9oYWMvODg2Njg0NTgxODkxMC9wX0xYX0NvbG91ckNvbGxlY3Rpb25fQ2hhbGtfV2hpdGVfUkdCXzEyMDB4MTIwMF9MUi5qcGdfMTIwMFd4OTc5SHxiM2Y1ZGUyYzYxMTc5YjUwMzZkNjA4NjEzZWM3ZDg4YWVjOWM4ZjdhMDNhNTBlYzEyZTc3NmRlOGRlOTFiMzEx",

@@ -50,8 +50,13 @@ module.exports = async (
       outerMargin,   // percent based margin (will be calculated to be 5%)
       output         // return data
   
-  // load SVG template
-  const $ = cheerio.load(template);
+  // TODO add support for using CDDATA
+  // Note: When xmlMode:true CDDATA is parsed correctly and SVG works.
+  // however when xmlMode:true and the origin SVG doesn't contain CDDATA
+  // it breaks. A solution must determine if the xmlMode should be true/false, based on 
+  // if the input is an SVG and if it contains CDDATA.
+  // for now, the image generator setting allows for SVG's without embedded CDDATA.
+  var $ = cheerio.load(template); //, { xmlMode: true });
   
   // fetch the NFT Data 
   const imageUrlData = await recursiveFetch(imageUrl);
@@ -75,7 +80,7 @@ module.exports = async (
     const svgWidth = svgEl.attr('width');
     const svgHeight = svgEl.attr('height');
     let svgViewBoxData = svgViewBox ? svgEl.attr('viewBox').split(' ') : undefined;
-  
+
     // Assign the height / width of original NFT to imgW, imgH
     if (svgViewBoxData){
       // apply height width of SVG from ViewBox values
@@ -92,7 +97,7 @@ module.exports = async (
     }
 
     // Embed the SVG into the Remix SVG NFT
-    $('.autograph-nft-image-container').html($(svgUrlData));
+    $('.autograph-nft-image-container').append(svgUrlData);
   }
 
   // Image types; PNG, JPG, Gif: assign height and width to imgW, imgH.
@@ -296,6 +301,9 @@ module.exports = async (
     "<html><head></head><body>",
     "</body></html>"
   ];
+
+  // remove any script/s from output
+  $('script').remove();
 
   // output is SVG wrapped in html
   output = $.html();
