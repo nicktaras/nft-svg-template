@@ -5,10 +5,6 @@ https://www.npmjs.com/package/html-to-image
 
 ## TODO's
 
-- Fix Gif to PNG (if format === "PNG" convert GIF to PNG before other processes)
-- Smarter image colour detection logic / or send as parameter would be a cleaner and more performant solution
-- Error Handling
-- Security checks e.g. checking types / Security image libs
 - Unit Tests
 - Bench mark performance / Optimise code + increase performance
 
