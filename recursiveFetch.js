@@ -15,9 +15,11 @@ let maxAttempts = 3;
   }
 */
 
+const userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36";
+
 const recursiveFetchHandler = (url, attempts) => {
   return new Promise((resolve, reject) => {
-    fetch(url).then((res) => {
+    fetch(url, { headers: { 'User-Agent': userAgent }}).then((res) => {
       // console.log('done');
       return resolve(res);
     }, (e) => {
