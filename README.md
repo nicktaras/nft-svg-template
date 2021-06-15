@@ -19,3 +19,7 @@ This loads the mock function imageGenerator() with params.
 
 - https://amio.github.io/embedded-google-fonts/ (Base64 Google Fonts)
 - https://github.com/svg/svgo (SVG optimiser)
+
+## video 
+
+https://storage.opensea.io/files/c1264f96360fb5c756bb126357e05410.mp4

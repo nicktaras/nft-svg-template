@@ -11,36 +11,16 @@ const Jimp = require('jimp');
 
   interface: {
     imageBuffer (image buffer) 
-    x: int (x position)
-    y: int (y position) 
-    dx: int (x end position)
-    dy: int (y end position)
   }
 
   NOTES:
 
-  The detect method is a private function to this script
-  which calculates the output.  
-
-  At this time the area is fixed, but can be adjusted easily to
-  meet new requirements. This function best performs checking a small area of pixels.
-
-  TODO:
-
-  For better detection, break the image into squares (e.g. 20 parts) and test one pixel 
-  per part, to gain an idea of the colour of the pixels across the image for a more
-  accurate reading at the similar compute cost
+  The current threshold between light and dark, is favouring white text.
+  Adjustments should be made to even the output colour.
 
 */
 
-const detect = async ({
-  imageBuffer, 
-  x, 
-  y, 
-  dx, 
-  dy, 
-  allowedTextColors
-}) => {
+const detect = async (imageBuffer, allowedTextColors) => {
 
   let image;
   let result = [];
@@ -48,8 +28,16 @@ const detect = async ({
 
   try {
       image = await Jimp.read(imageBuffer);
+      // reduce size
+      const maxHeightWidth = 10;
+      const h = image.bitmap.height > maxHeightWidth ? maxHeightWidth: image.bitmap.height;
+      const w = image.bitmap.width > maxHeightWidth ? maxHeightWidth: image.bitmap.width;
+      // 
+      image.resize(h, w).quality(50);
+      // get colours from the right hand side of the image
+      image.crop(w / 2, 0, 1, h / 2);
       // crop image to detect only selected area
-      image.crop( x, y, dx, dy );
+      // image.crop( x, y, dx, dy );
       let newBuff = await image.getBufferAsync(Jimp.MIME_PNG);
       // detect most used color palette
       let colors = await getColors(newBuff, {
@@ -69,13 +57,10 @@ const detect = async ({
               diffsum = Math.abs(parseInt(foundColor[1], 16) - parseInt(foundPalette[1], 16)) +
                   Math.abs(parseInt(foundColor[2], 16) - parseInt(foundPalette[2], 16)) +
                   Math.abs(parseInt(foundColor[3], 16) - parseInt(foundPalette[3], 16));
-
               result.push({diff: diffsum,palette});
-
           })
       });
-      result.sort((item1,item2)=>item2.diff - item1.diff );
-
+      result.sort((item1, item2) => item2.diff - item1.diff);
   } catch (e) {
       console.log('Something went wrong:', e);
   }
@@ -86,26 +71,13 @@ const detect = async ({
   return result[0].palette;
 }
 
-module.exports = async ({
-  imageBuffer,
-  x,
-  y,
-  dx,
-  dy
-}) => {
+module.exports = async (imageBuffer) => {
 
   // required in format '#xxxxxx', #xxx not allowed
   const allowedTextColors = ['#ffffff', '#000000'];
 
   // example output: '#ffffff', '#000000'
-  const output = await detect({ 
-      imageBuffer, 
-      x,
-      y,
-      dx,
-      dy,
-      allowedTextColors
-  });
+  const output = await detect(imageBuffer, allowedTextColors);
   
   return !(output === "#ffffff") ? true : false;
 

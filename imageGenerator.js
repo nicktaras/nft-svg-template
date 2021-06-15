@@ -272,16 +272,8 @@ module.exports = async (
     $('.autograph-nft-not-signed').remove();
   };
 
-  // can be increased at the cost of performance
-  const imageArea = 5;
   let isLightImage = true;
-  isLightImage = await isLightContrastImage({ 
-    imageBuffer,
-    x: 0,
-    y: 0,
-    dx: (imgW/imageArea) > 1 ? (imgW/imageArea) : 1,
-    dy: (imgH/imageArea) > 1 ? (imgH/imageArea) : 1,
-  });
+  isLightImage = await isLightContrastImage(imageBuffer);
 
   // Define if the colour theme for text is black or white.
   const fontColourTheme = isLightImage ? "black" : "white";
