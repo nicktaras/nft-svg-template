@@ -258,9 +258,12 @@ module.exports = async (
   }));
 
   // Status text positioning
+  // TODO - embed the font and calculate this dynamically in a future fix.
   let xPosStatus;
   if (data[0].title.toUpperCase().indexOf("SIGNED") > -1) {  
     xPosStatus = (imgW - rootPixelSize * 3.2) - (outerMargin); 
+  } else if (data[0].title.toUpperCase().indexOf("SIGNING") > -1) {  
+    xPosStatus = (imgW - rootPixelSize * 3.8) - (outerMargin); 
   } else { 
     xPosStatus = (imgW - rootPixelSize * 5.2) - (outerMargin); 
   }

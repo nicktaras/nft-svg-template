@@ -17,19 +17,20 @@ const imageGenerator = require("./imageGenerator");
 const format = 'svg';
 
 imageGenerator(
+    // "https://via.placeholder.com/300.png/000",
     // "https://via.placeholder.com/300.png/111",
     // "https://via.placeholder.com/300.png/222",
     // "https://via.placeholder.com/300.png/333",
     // "https://via.placeholder.com/300.png/444",
     // "https://via.placeholder.com/300.png/555",
     // "https://via.placeholder.com/300.png/666",
-    // "https://via.placeholder.com/300.png/777",
+    "https://via.placeholder.com/300.png/777",
     // "https://via.placeholder.com/300.png/888",
     // "https://via.placeholder.com/300.png/999",
-    "https://via.placeholder.com/300.png/fff",
+    // "https://via.placeholder.com/300.png/fff",
   [
     {
-      title: "Signed:",
+      title: "Signing:",
       photoURL: "https://pbs.twimg.com/profile_images/264316321/beeple_headshot_beat_up_400x400.jpg",
       name: "@weihong_hu",
       twitterId: "1385403298945986561",

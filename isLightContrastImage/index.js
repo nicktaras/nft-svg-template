@@ -18,16 +18,20 @@ const Jimp = require('jimp');
   The current threshold between light and dark, is favouring white text.
   Adjustments should be made to even the output colour.
 
-*/
+  https://codepen.io/andreaswik/pen/YjJqpK
 
+*/
+const reducer = (accumulator, currentValue) => accumulator + currentValue;
 const detect = async (imageBuffer, allowedTextColors) => {
 
   let image;
-  let result = [];
+  let output = "#fffffff";
   let diffsum;
+  let colors;
 
   try {
       image = await Jimp.read(imageBuffer);
+      let result = [];
       // reduce size
       const maxHeightWidth = 10;
       const h = image.bitmap.height > maxHeightWidth ? maxHeightWidth: image.bitmap.height;
@@ -40,35 +44,31 @@ const detect = async (imageBuffer, allowedTextColors) => {
       // image.crop( x, y, dx, dy );
       let newBuff = await image.getBufferAsync(Jimp.MIME_PNG);
       // detect most used color palette
-      let colors = await getColors(newBuff, {
+      colors = await getColors(newBuff, {
           // count of colors
           count: 1,
           // type of input fileBuffer
           type: Jimp.MIME_PNG
       });
-      allowedTextColors.forEach(palette=>{
-          // we can compare differenceSumPerColorChanel between allowed color palette items and
-          colors.forEach(color => {
-              diffsum = 0;
-              // console.log(color.hex(), palette);
-              var re = /^#([\da-z]{2})([\da-z]{2})([\da-z]{2})$/i;
-              var foundColor = color.hex().toLowerCase().match(re);
-              var foundPalette = palette.toLowerCase().match(re);
-              diffsum = Math.abs(parseInt(foundColor[1], 16) - parseInt(foundPalette[1], 16)) +
-                  Math.abs(parseInt(foundColor[2], 16) - parseInt(foundPalette[2], 16)) +
-                  Math.abs(parseInt(foundColor[3], 16) - parseInt(foundPalette[3], 16));
-              result.push({diff: diffsum,palette});
-          })
+      allowedTextColors.forEach( palette => {
+        colors.forEach(color => {
+          diffsum = 0;
+          console.log(color);
+          result.push(color.luminance());
+        })
       });
-      result.sort((item1, item2) => item2.diff - item1.diff);
+
+    
+      // 100 // 10
+      output = result.reduce(reducer) > colors.length / 2 ? "#000000" : "#FFFFFF";
+
   } catch (e) {
       console.log('Something went wrong:', e);
   }
 
-  // fall back allowing the application to generate image
-  if(!result || !result[0] || !result[0].palette) return "#ffffff";
 
-  return result[0].palette;
+
+  return output;
 }
 
 module.exports = async (imageBuffer) => {
