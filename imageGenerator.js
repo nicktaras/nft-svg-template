@@ -1,5 +1,4 @@
 const cheerio = require('cheerio');
-const svg64 = require('svg64');
 const recursiveFetch = require('./recursiveFetch');
 const sizeOf = require('image-size');
 const sharp = require('sharp');
@@ -39,7 +38,7 @@ module.exports = async (
   imageUrl,
   data,
   base64Encode,
-  format
+  format = 'svg'
 ) => {
 
   let imgH,          // Height of Remix NFT
@@ -50,13 +49,8 @@ module.exports = async (
       outerMargin,   // percent based margin (will be calculated to be 5%)
       output         // return data
   
-  // TODO add support for using CDDATA
-  // Note: When xmlMode:true CDDATA is parsed correctly and SVG works.
-  // however when xmlMode:true and the origin SVG doesn't contain CDDATA
-  // it breaks. A solution must determine if the xmlMode should be true/false, based on 
-  // if the input is an SVG and if it contains CDDATA.
-  // for now, the image generator setting allows for SVG's without embedded CDDATA.
-  var $ = cheerio.load(template); //, { xmlMode: true });
+  // load SVG template
+  const $ = cheerio.load(template);
   
   // fetch the NFT Data 
   const imageUrlData = await recursiveFetch(imageUrl);
@@ -80,7 +74,7 @@ module.exports = async (
     const svgWidth = svgEl.attr('width');
     const svgHeight = svgEl.attr('height');
     let svgViewBoxData = svgViewBox ? svgEl.attr('viewBox').split(' ') : undefined;
-
+  
     // Assign the height / width of original NFT to imgW, imgH
     if (svgViewBoxData){
       // apply height width of SVG from ViewBox values
@@ -97,7 +91,7 @@ module.exports = async (
     }
 
     // Embed the SVG into the Remix SVG NFT
-    $('.autograph-nft-image-container').append(svgUrlData);
+    $('.autograph-nft-image-container').html($(svgUrlData));
   }
 
   // Image types; PNG, JPG, Gif: assign height and width to imgW, imgH.
@@ -109,8 +103,8 @@ module.exports = async (
     var isFallBackImage = fallBackTypes.includes(contentType);
     // convert fall back image to PNG
     if (isFallBackImage && format.toUpperCase() === "PNG") {
-      const gifToPngBuffer = await sharp(imageBuffer).toBuffer('png');
-      imageBuffer = gifToPngBuffer;
+      const fallbackImgToPngBuffer = await sharp(imageBuffer).toBuffer('png');
+      imageBuffer = fallbackImgToPngBuffer;
     }
     // base64 + define width/height from image data
     const imageBase64 = `data:image/${contentType};base64,`+imageBuffer.toString('base64');
@@ -208,7 +202,7 @@ module.exports = async (
 
       if(!val) val = googleFontData[1];
 
-      autographSVGText += `<tspan font-size-adjust="${rootPixelSize * 0.03}" x="${startPosX + textWidth}" y="${rootPixelSize * 1.2}" width=${val}>${char}</tspan>`;
+      autographSVGText += `<tspan x="${startPosX + textWidth}" y="${rootPixelSize * 1.2}" width=${val}>${char}</tspan>`;
 
       // adjust for spacing between letters
       textWidth += (val * (rootPixelSize * 0.065));
@@ -259,6 +253,7 @@ module.exports = async (
 
   // Status text positioning
   // TODO: add font data to allow for dynamic positioning. 
+  let xPosStatus;
   if (data[0].title.toUpperCase().indexOf("SIGNED") > -1) {  
     xPosStatus = (imgW - rootPixelSize * 3.2) - (outerMargin); 
   } else if (data[0].title.toUpperCase().indexOf("SIGNING") > -1) {  
@@ -274,16 +269,13 @@ module.exports = async (
     $('.autograph-nft-not-signed').remove();
   };
 
-  // can be increased at the cost of performance
-  const imageArea = 5;
+
   let isLightImage = true;
-  isLightImage = await isLightContrastImage({ 
-    imageBuffer,
-    x: 0,
-    y: 0,
-    dx: (imgW/imageArea) > 1 ? (imgW/imageArea) : 1,
-    dy: (imgH/imageArea) > 1 ? (imgH/imageArea) : 1,
-  });
+
+  // calculate if the image is dark or light
+  isLightImage = await isLightContrastImage(imageBuffer);
+
+  console.log((isLightImage) ? "Black Image" : "White Image");
 
   // Define if the colour theme for text is black or white.
   const fontColourTheme = isLightImage ? "black" : "white";
@@ -314,17 +306,41 @@ module.exports = async (
   removeList.map((item) => {
     output = output.replace(item, "");
   });
-
-  // Base64 output if parameter flag set to true
-  if (base64Encode) output = svg64(output);
+  output = Buffer.from(output);
 
   // define image data return type
   if (format.toUpperCase() === 'PNG') {
-    const svgToBuffer = Buffer.from(output);
-    const pngOutput = await sharp(svgToBuffer).toBuffer('png');
+    const pngOutput = await sharp(output)
+      .png({
+        compressionLevel: 9,
+        adaptiveFiltering: true,
+        quality: 90,
+      })
+      .toBuffer();
     output = pngOutput;
   }
-  
-  return output;
 
-}
+  // Base64 output if parameter flag set to true
+  if (base64Encode) {
+    let outContentType;
+    switch (format.toLowerCase()) {
+      case 'svg':
+        outContentType = 'image/svg+xml';
+        break;
+      case 'png':
+        outContentType = 'image/png';
+        break;
+      case 'jpeg':
+        outContentType = 'image/jpeg';
+        break;
+      default:
+        throw new Error(
+          `Unsupported image format '${format.toLocaleLowerCase()}'`
+        );
+    }
+
+    output = `data:${outContentType};base64,${output.toString('base64')}`;
+  }
+
+  return output;
+};
