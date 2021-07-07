@@ -42,7 +42,7 @@ module.exports = async (imageBuffer) => {
   // width/height of image (increase for more accuracy & cost in performance)
   const widthHeight = 4;
   // get image data
-  const { data, info } = await sharp(imageBuffer)
+  const { data } = await sharp(imageBuffer)
   .resize({ width: widthHeight })
   .raw()
   .toBuffer({ resolveWithObject: true });
@@ -59,7 +59,7 @@ module.exports = async (imageBuffer) => {
     const ratio = pixel > pixelB
     ? ((pixelB + 0.05) / (pixel + 0.05))
     : ((pixel + 0.05) / (pixelB + 0.05));
-    colorList.push(ratio);
+    if(!isNaN(ratio)) colorList.push(ratio);
   }
   // get average luminance value of light vs dark pixels.
   const avg = mean(colorList);
