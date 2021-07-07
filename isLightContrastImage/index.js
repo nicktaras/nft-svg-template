@@ -15,9 +15,6 @@ const sharp = require('sharp');
   getRGBLuminance calculates the luminance of a pixel. The logic applied is based
   upon https://www.w3.org/TR/WCAG20-TECHS/G18.html
 
-  At this time the area is fixed, but can be adjusted easily to
-  meet new requirements. This function best performs checking a small area of pixels.
-
   TODO:
 
   For better detection, break the image into squares (e.g. 20 parts) and test one pixel 
@@ -59,8 +56,9 @@ module.exports = async (imageBuffer) => {
     const ratio = pixel > pixelB
     ? ((pixelB + 0.05) / (pixel + 0.05))
     : ((pixel + 0.05) / (pixelB + 0.05));
-    colorList.push(ratio);
+    if(!Number.isNaN(ratio)) colorList.push(ratio);
   }
+
   // get average luminance value of light vs dark pixels.
   const avg = mean(colorList);
   
