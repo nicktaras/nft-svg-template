@@ -1,5 +1,4 @@
-const getColors = require('get-image-colors');
-const Jimp = require('jimp');
+const sharp = require('sharp');
 
 /*
   FUNCTION: 
@@ -9,18 +8,12 @@ const Jimp = require('jimp');
   returns a boolean if the given image is light or dark. A use case
   being to determine is white or black text should be overlayed onto the image. 
 
-  interface: {
-    imageBuffer (image buffer) 
-    x: int (x position)
-    y: int (y position) 
-    dx: int (x end position)
-    dy: int (y end position)
-  }
+  interface: imageBuffer 
 
   NOTES:
 
-  The detect method is a private function to this script
-  which calculates the output.  
+  getRGBLuminance calculates the luminance of a pixel. The logic applied is based
+  upon https://www.w3.org/TR/WCAG20-TECHS/G18.html
 
   At this time the area is fixed, but can be adjusted easily to
   meet new requirements. This function best performs checking a small area of pixels.
@@ -33,80 +26,45 @@ const Jimp = require('jimp');
 
 */
 
-const detect = async ({
-  imageBuffer, 
-  x, 
-  y, 
-  dx, 
-  dy, 
-  allowedTextColors
-}) => {
-
-  let image;
-  let result = [];
-  let diffsum;
-
-  try {
-      image = await Jimp.read(imageBuffer);
-      // crop image to detect only selected area
-      image.crop( x, y, dx, dy );
-      let newBuff = await image.getBufferAsync(Jimp.MIME_PNG);
-      // detect most used color palette
-      let colors = await getColors(newBuff, {
-          // count of colors
-          count: 1,
-          // type of input fileBuffer
-          type: Jimp.MIME_PNG
-      });
-      allowedTextColors.forEach(palette=>{
-          // we can compare differenceSumPerColorChanel between allowed color palette items and
-          colors.forEach(color => {
-              diffsum = 0;
-              // console.log(color.hex(), palette);
-              var re = /^#([\da-z]{2})([\da-z]{2})([\da-z]{2})$/i;
-              var foundColor = color.hex().toLowerCase().match(re);
-              var foundPalette = palette.toLowerCase().match(re);
-              diffsum = Math.abs(parseInt(foundColor[1], 16) - parseInt(foundPalette[1], 16)) +
-                  Math.abs(parseInt(foundColor[2], 16) - parseInt(foundPalette[2], 16)) +
-                  Math.abs(parseInt(foundColor[3], 16) - parseInt(foundPalette[3], 16));
-
-              result.push({diff: diffsum,palette});
-
-          })
-      });
-      result.sort((item1,item2)=>item2.diff - item1.diff );
-
-  } catch (e) {
-      console.log('Something went wrong:', e);
-  }
-
-  // fall back allowing the application to generate image
-  if(!result || !result[0] || !result[0].palette) return "#ffffff";
-
-  return result[0].palette;
-}
-
-module.exports = async ({
-  imageBuffer,
-  x,
-  y,
-  dx,
-  dy
-}) => {
-
-  // required in format '#xxxxxx', #xxx not allowed
-  const allowedTextColors = ['#ffffff', '#000000'];
-
-  // example output: '#ffffff', '#000000'
-  const output = await detect({ 
-      imageBuffer, 
-      x,
-      y,
-      dx,
-      dy,
-      allowedTextColors
+const getRGBLuminance = (r, g, b) => {
+  var a = [r, g, b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow( (v + 0.055) / 1.055, 2.4 );
   });
-  
-  return !(output === "#ffffff") ? true : false;
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+};
 
+const mean = (numbers) => (numbers.reduce((a, b) => a + b) / numbers.length);
+
+module.exports = async (imageBuffer) => {
+  // store list of pixels (0,1's based on ouput).
+  const colorList = [];
+  // width/height of image (increase for more accuracy & cost in performance)
+  const widthHeight = 4;
+  // get image data
+  const { data } = await sharp(imageBuffer)
+  .resize({ width: widthHeight })
+  .raw()
+  .toBuffer({ resolveWithObject: true });
+  // get pixel array from buffer
+  const pixelArray = new Uint8ClampedArray(data.buffer);
+  // loop through rgb values to determin the luminance of the image
+  for(var i = 0; i < pixelArray.length / 3; i++){
+    var startPixel = i * 3;
+    var r = pixelArray[startPixel];
+    var g = pixelArray[startPixel + 1];
+    var b = pixelArray[startPixel + 2];
+    const pixel = getRGBLuminance(r, g, b);
+    const pixelB = 0;
+    const ratio = pixel > pixelB
+    ? ((pixelB + 0.05) / (pixel + 0.05))
+    : ((pixel + 0.05) / (pixelB + 0.05));
+    colorList.push(ratio);
+  }
+  // get average luminance value of light vs dark pixels.
+  const avg = mean(colorList);
+  
+  console.log("avg is:", avg, (avg <= 0.22) ? "this is a light image" : "this is a dark image");
+
+  return (avg <= 0.22) ? true : false;
 };
