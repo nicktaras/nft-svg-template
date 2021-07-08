@@ -91,14 +91,17 @@ module.exports = async (imageUrl, data, base64Encode, format = 'svg') => {
   if (contentType.indexOf('svg') <= -1) {
     imageBuffer = await sharp(imageUrlData.data).toBuffer();
 
-    // Fix for Linux to convert gif of Webp to PNG
-    const fallBackTypes = ['image/gif', 'image/webp'];
-    const isFallBackImage = fallBackTypes.includes(contentType);
-    // convert fall back image to PNG
-    if (isFallBackImage && format.toUpperCase() === 'PNG') {
-      const fallbackImgToPngBuffer = await sharp(imageBuffer).toBuffer('png');
-      imageBuffer = fallbackImgToPngBuffer;
+    // convert webp images to png as a fall back operation.
+    if (
+      contentType === 'image/webp'
+    ) {
+      imageBuffer = await sharp(imageBuffer).toFormat('png').toBuffer();
     }
+    // create animated image buffer
+    if (contentType === 'image/gif'){
+      imageBuffer = await sharp(imageUrlData.data, { animated: true }).toBuffer();
+    }
+
     const imageBase64 = `data:image/${contentType};base64,` + imageBuffer.toString('base64');
     // acquire image width / height
     const info = await sharp(imageUrlData.data).metadata();
