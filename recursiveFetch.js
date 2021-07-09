@@ -49,8 +49,11 @@ module.exports = async imageUrl => {
   attemptsUsed = 0;
   return new Promise((resolve, reject) => {
     recursiveFetchHandler(imageUrl, attemptsUsed).then(
-      data => {
-        resolve(data);
+      results => {
+        resolve({
+          image: results.data,
+          contentType: results.headers['content-type'] 
+        });
       },
       e => {
         reject(e);
