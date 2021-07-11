@@ -32,14 +32,14 @@ const applyBackgroundImage = ({ $, contentType, image, imgW, imgH }) => {
     $('.autograph-nft-image-container').html(svgEl);
   } else {
     const imageBase64 = `data:${contentType};base64,` + image.toString('base64');
-    $('.autograph-nft-image').eq(0).attr({ href: imageBase64, height: imgH, width: imgW });
+    $('.autograph-nft-image-container image').eq(0).attr({ href: imageBase64, height: imgH, width: imgW });
   }
 }
 
 const getImageFallbackHandler = async ({ contentType, image }) => { 
   if (contentType === 'image/webp') {
-    image = await sharp(image).toFormat('png').toBuffer();
-    contentType = 'image/png';
+    image = await sharp(image).toFormat('jpg').toBuffer();
+    contentType = 'image/jpg';
   }
   return {
     image,
@@ -94,7 +94,7 @@ const applyFontAndLabelColours = ({
   text
 }) => {
   $(labels).css({ fill: labelColour });
-  $(text).attr({ fill: fontColour });
+  $(text).css({ fill: fontColour });
 }
 
 const getBase64TwitterImage = async (photoURL) => {
@@ -146,7 +146,7 @@ const applyAutographs = async ({
         textWidth += val * (rootPixelSize * 0.065);
       }
     );
-    const twitterIdProfileWidth = rootPixelSize * 1.9; // width of twitter image with margin left/right
+    const twitterIdProfileWidth = rootPixelSize * 1.9;
     const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
     const imgPadding = rootPixelSize * 0.15; // padding top / left for image
     const autographFontSize = rootPixelSize * 1.1;
@@ -250,13 +250,13 @@ const getFinalOutput = async ({
   return output;
 }
 
-const getImageData = async ({ $, imageUrl, data }) => {
+const getImageData = async ({ $, imageUrl }) => {
   let { image, contentType } = await recursiveFetch(imageUrl);
   const { imgW, imgH } = await getIMGDimensions({ $, contentType, image });
   const shortestDimension = getShortestDimension(imgW, imgH);
   const { fontColour, labelColour } = await getColourTheme(image);
   // if webp return png
-  ({ image, contentType } = await getImageFallbackHandler({ contentType, image }));
+  // ({ image, contentType } = await getImageFallbackHandler({ contentType, image }));
   return {
     image,
     contentType,
