@@ -3,62 +3,35 @@ const getDimensionsSVG = require('./getDimensionsSVG');
 const getDimensionsIMG = require('./getDimensionsIMG');
 const googleFontData = require('./googleFontData');
 const recursiveFetch = require('./recursiveFetch');
+const isLightContrastImage = require('./isLightContrastImage/index');
 
-const getIMGDimensions = async ({ $, contentType, image }) => {
-  if (contentType === 'image/svg') 
-  {
-    const svgEl = $(image);
-    const getSVGDimensions = getDimensionsSVG(svgEl);
-    return { imgW: getSVGDimensions.imgW, imgH: getSVGDimensions.imgH }
-  } 
-    else 
-  {
-    const getIMGDimensions = await getDimensionsIMG(image);
-    return { imgW: getIMGDimensions.imgW, imgH: getIMGDimensions.imgH }
+const getAllTemplateData = async ({ $, imageUrl, data }) => {
+  let { image, contentType } = await recursiveFetch(imageUrl);
+  const { imgW, imgH } = await getIMGDimensions({ $, contentType, image });
+  const shortestDimension = getShortestDimension(imgW, imgH);
+  const { fontColour, labelColour } = await getColourTheme(image);
+  const templateStatus = getTemplateStatus(data[0].title);
+  const rootPixelSize = (shortestDimension / 16) * 0.64;
+  const innerPadding = shortestDimension * 0.05;  
+  // if webp return png
+  ({ image, contentType } = await imageFallBackProccessing({ contentType, image }));
+  return {
+    image,
+    templateStatus,
+    contentType,
+    imgW, 
+    imgH,
+    shortestDimension,
+    fontColour, 
+    labelColour,
+    rootPixelSize,
+    innerPadding
   }
 }
 
-const getLowestNumber = (a, b) => { return a < b ? a : b }
+const applyStatus = ({ $, elementName, eq, attr, text }) => applyToTemplate({  $, elementName, eq, attr, text });
 
-const appendImageDimensions = ({ $, imgW, imgH }) => {
-  return $('.autograph-nft-wrapper').css({ height: imgH, width: imgW }).attr({ viewBox: `0 0 ${imgW} ${imgH}` });
-}
-
-const appendBackgroundImage = ({ $, contentType, image, imgW, imgH }) => {
-  if (contentType === 'image/svg') 
-  {
-    const svgEl = $(image);
-    $('.autograph-nft-image-container').html(svgEl);
-  } 
-    else 
-  {
-    const imageBase64 = `data:${contentType};base64,` + image.toString('base64');
-    $('.autograph-nft-image').eq(0).attr({ href: imageBase64, height: imgH, width: imgW });
-  }
-}
-
-const assignInputImage = async ({ contentType, image }) => { 
-  if (contentType === 'image/webp') image = await sharp(image).toFormat('jpg').toBuffer();
-  return image;
-}
-
-const applyToTemplate = ({ $, elementName, eq, attr, text }) => {
-  const el = $(elementName).eq(eq);
-  if(attr) { el.attr(attr); }   
-  if(text) { console.log(text); el.text(text); }
-}
-
-const applyManyToTemplate = ({ $, elements }) => {
-  elements.map((data) => {
-    const { elementName, eq, attr } = data;
-    applyToTemplate({
-      $,
-      elementName, 
-      eq, 
-      attr
-    });
-  });
-}
+const applyTimeStamp = ({ $, elementName, eq, attr, text }) => applyToTemplate({  $, elementName, eq, attr, text });
 
 const getTemplateStatus = (title) => {
   if (title.toUpperCase().startsWith('SIGNED')) return "SIGNED";
@@ -66,18 +39,108 @@ const getTemplateStatus = (title) => {
   else return undefined;
 }
 
-const removeNotSignedLabelCheck = (templateStatus) => {
-  if (templateStatus === 'SIGNED') $('.autograph-nft-not-signed').remove();
+const getShortestDimension = (a, b) => { return a < b ? a : b }
+
+const applyTemplateDimensions = ({ $, imgW, imgH }) => $('.autograph-nft-wrapper').css({ height: imgH, width: imgW }).attr({ viewBox: `0 0 ${imgW} ${imgH}` });
+
+const getIMGDimensions = async ({ $, contentType, image }) => {
+  if (contentType === 'image/svg') {
+    const svgEl = $(image);
+    const getSVGDimensions = getDimensionsSVG(svgEl);
+    return { imgW: getSVGDimensions.imgW, imgH: getSVGDimensions.imgH }
+  } else {
+    const getIMGDimensions = await getDimensionsIMG(image);
+    return { imgW: getIMGDimensions.imgW, imgH: getIMGDimensions.imgH }
+  }
 }
 
-const appendAutographs = async ({ 
+const applyBackgroundImage = ({ $, contentType, image, imgW, imgH }) => {
+  if (contentType === 'image/svg') {
+    const svgEl = $(image);
+    $('.autograph-nft-image-container').html(svgEl);
+  } else {
+    const imageBase64 = `data:${contentType};base64,` + image.toString('base64');
+    $('.autograph-nft-image').eq(0).attr({ href: imageBase64, height: imgH, width: imgW });
+  }
+}
+
+const imageFallBackProccessing = async ({ contentType, image }) => { 
+  if (contentType === 'image/webp') {
+    image = await sharp(image).toFormat('png').toBuffer();
+    contentType = 'image/png';
+  }
+  return {
+    image,
+    contentType
+  };
+}
+
+const applyToTemplate = ({ $, elementName, eq, attr, text }) => {
+  const el = $(elementName).eq(eq);
+  if(attr) { el.attr(attr); }   
+  if(text) { el.text(text); }
+}
+
+const getColourTheme = async (image) => {
+  const lightContrastImage = await isLightContrastImage(image);
+  const darkColourTheme = { 
+    fontColour: "white", 
+    labelColour: "black" 
+  }
+  const lightColourTheme = { 
+    fontColour: "black", 
+    labelColour: "white" 
+  };
+  return lightContrastImage ? lightColourTheme : darkColourTheme;
+}
+
+const applyNotSignedLabel = ({ 
+  $,
+  templateStatus,
+  elements
+ }) => {
+  if (templateStatus === "SIGNING") {
+    elements.map((data) => {
+      const { elementName, eq, attr } = data;
+      applyToTemplate({
+        $,
+        elementName, 
+        eq, 
+        attr
+      });
+    });
+  }
+}
+const removeNotSignedLabel = (templateStatus) => {
+  if (templateStatus === 'SIGNED') $('.autograph-nft-not-signed').remove();
+}
+const applyFontAndLabelColours = ({ 
+  $, 
+  fontColour,
+  labelColour,
+  labels,
+  text
+}) => {
+  $(labels).css({ fill: labelColour });
+  $(text).attr({ fill: fontColour });
+}
+
+const getBase64TwitterImage = async (photoURL) => {
+  const { image, contentType } = await recursiveFetch(photoURL);
+  const imagePhotoURLBuffer = await sharp(image).toBuffer();
+  return `data:${contentType};base64, ${imagePhotoURLBuffer.toString('base64')}`;
+}
+
+const applyAutographs = async ({ 
   $, 
   data, 
   rootPixelSize, 
   labelContainerElement, 
   imgH, 
   imgW,
-  outerMargin
+  innerPadding,
+  labelMarginTopBottom,
+  labelHeight,
 }) => {
   // Collect the last three labels (upto 3 will be shown in the view)
   let labelData = data.slice(0, 3);
@@ -90,27 +153,21 @@ const appendAutographs = async ({
   let lastLabelYPos = 0;
 
   await Promise.all(labelData.map(async (label, index) => {
-    // Position the labels based on the scale of the image
-    const labelHeight = rootPixelSize * 1.7;
     let textWidth = 0;
-    const space = 1.1;
-    const labelPositionByIndex = index * (labelHeight * space);
+    const labelPositionByIndex = index * (labelHeight * labelMarginTopBottom);
     const offset = data.length > 3 ? labelHeight * 1.8 : 0;
-    const addOuterMargin = data.length <= 3 ? outerMargin : 0;
-    const yPos = imgH - labelHeight - labelPositionByIndex - offset - addOuterMargin;
+    const addinnerPadding = data.length <= 3 ? innerPadding : 0;
+    const yPos = imgH - labelHeight - labelPositionByIndex - offset - addinnerPadding;
     lastLabelYPos = yPos;
-    // Placeholder to build SVG label text
     let autographSVGText = '';
-    // Start position beside the Twitter profile image
-    const startPosX = rootPixelSize * 1.7;
-    // Text width (incremented as the letters are defined in SVG)
+    // incremented as the letters are defined in SVG
     textWidth = 0;
     // e.g. [@,B,e,e,p,l,e,.,3,4,6,4,6,6,5,6,4]
     [...label.name.match(/./g), ...['.'], ...label.twitterId.match(/./g)].map(
       char => {
         let val = googleFontData[char];
         if (!val) val = googleFontData[1];
-        autographSVGText += `<tspan x="${startPosX + textWidth}" y="${
+        autographSVGText += `<tspan x="${labelHeight + textWidth}" y="${
           rootPixelSize * 1.2
         }" width=${val}>${char}</tspan>`;
         // adjust for spacing between letters
@@ -121,16 +178,13 @@ const appendAutographs = async ({
     const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
     const imgPadding = rootPixelSize * 0.15; // padding top / left for image
     const autographFontSize = rootPixelSize * 1.1;
-    const twitterData = await recursiveFetch(label.photoURL);
-    const imagePhotoURLBuffer = await sharp(twitterData.image).toBuffer();
-    const photoURLContentType = await twitterData.contentType;
-    const imagePhotoURLBase64 = `data:${photoURLContentType};base64, ${imagePhotoURLBuffer.toString('base64')}`;
+    const imagePhotoURLBase64 = await getBase64TwitterImage(label.photoURL);
     textWidth += twitterIdProfileWidth;
     // build label templates
     labelTemplates += `<svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${
-      imgW - textWidth - outerMargin
+      imgW - textWidth - innerPadding
     }" y="${yPos}"><rect x="0" y="0" width="${textWidth}" height="${
-      rootPixelSize * 1.7
+      labelHeight
     }" style="black" fill-opacity="0.3" rx="2"></rect><text x="0" y="0" style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">${autographSVGText}</text><svg x="${imgPadding}" y="${imgPadding}" width="${twitterImageWidth}" height="${twitterImageWidth}"><defs><clipPath id="myCircle"><circle cx="${
       twitterImageWidth / 2
     }" cy="${twitterImageWidth / 2}" r="${
@@ -140,7 +194,7 @@ const appendAutographs = async ({
       const yPos = imgH - labelHeight * 1.7;
       const maxLabelTemplate = `
         <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${
-          imgW - autographFontSize * 6.5 - outerMargin
+          imgW - autographFontSize * 6.5 - innerPadding
         }" y="${yPos}">
           <g>
             <rect x="0" y="0" width="${
@@ -157,97 +211,88 @@ const appendAutographs = async ({
       labelTemplates += maxLabelTemplate;
     }
   }))
-  // Status text positioning
+  // Status text positioning (should be updated to be dynamic).
   let xPosStatus;
   if (data[0].title.toUpperCase().indexOf('SIGNED') > -1) {
-    xPosStatus = imgW - rootPixelSize * 3.2 - outerMargin;
+    xPosStatus = imgW - rootPixelSize * 3.2 - innerPadding;
   } else if (data[0].title.toUpperCase().indexOf('SIGNING') > -1) {
-    xPosStatus = imgW - rootPixelSize * 3.8 - outerMargin;
+    xPosStatus = imgW - rootPixelSize * 3.8 - innerPadding;
   } else {
-    xPosStatus = imgW - rootPixelSize * 5.2 - outerMargin;
+    xPosStatus = imgW - rootPixelSize * 5.2 - innerPadding;
   }
-  console.log(lastLabelYPos);
-  $('.autograph-nft-status').attr({
-    x: xPosStatus,
-    y: lastLabelYPos - rootPixelSize * 4
-  });
-  $('.autograph-nft-status text').attr({
-    'font-size': rootPixelSize * 0.8,
-    y: rootPixelSize * 3.2,
-  });
-  // Append all the labels to the Remixed NFT template
+  $('.autograph-nft-status').attr({ x: xPosStatus, y: lastLabelYPos - rootPixelSize * 4 });
+  $('.autograph-nft-status text').attr({ 'font-size': rootPixelSize * 0.8, y: rootPixelSize * 3.2 });
+  // apply all the labels to the Remixed NFT template
   $(labelContainerElement).eq(0).append(`${labelTemplates}`);
 }
 
-const getOutput = async ({
+const getBase64Output = ({ format, output }) => {
+  let outContentType;
+  switch (format.toLowerCase()) {
+    case 'svg':
+      outContentType = 'image/svg+xml';
+      break;
+    case 'png':
+      outContentType = 'image/png';
+      break;
+    case 'jpeg':
+      outContentType = 'image/jpeg';
+      break;
+    default:
+      throw new Error(
+        `Unsupported image format '${format.toLocaleLowerCase()}'`
+      );
+  }
+  return `data:${outContentType};base64,${output.toString('base64')}`;
+}
+
+// remove the outer html wrapper and return the svg data
+const prepareOutputXmlTemplate = ($) => {
+  const removeList = ['<html><head></head><body>', '</body></html>'];
+  $('script').remove();
+  output = $.html();
+  removeList.map(item => { output = output.replace(item, '') });
+  return output;
+}
+
+const preparePngOutput = async (output) => {
+  output = Buffer.from(output);
+  const pngOutput = await sharp(output)
+    .png({
+      compressionLevel: 9,
+      adaptiveFiltering: true,
+      quality: 90,
+    })
+    .toBuffer();
+  return pngOutput;
+}
+
+const getFinalOutput = async ({
   $,
   format,
   base64Encode
 }) => {
-
-  // prepare output
-  const removeList = ['<html><head></head><body>', '</body></html>'];
-
-  // remove any script/s from output
-  $('script').remove();
-
-  // output is SVG wrapped in html
-  output = $.html();
-
-  // remove the outer html wrapper
-  removeList.map(item => {
-    output = output.replace(item, '');
-  });
-
-  output = Buffer.from(output);
-
-  // define image data return type
-  if (format.toUpperCase() === 'PNG') {
-    const pngOutput = await sharp(output)
-      .png({
-        compressionLevel: 9,
-        adaptiveFiltering: true,
-        quality: 90,
-      })
-      .toBuffer();
-    output = pngOutput;
-  }
-
-  // Base64 output if parameter flag set to true
-  if (base64Encode) {
-    let outContentType;
-    switch (format.toLowerCase()) {
-      case 'svg':
-        outContentType = 'image/svg+xml';
-        break;
-      case 'png':
-        outContentType = 'image/png';
-        break;
-      case 'jpeg':
-        outContentType = 'image/jpeg';
-        break;
-      default:
-        throw new Error(
-          `Unsupported image format '${format.toLocaleLowerCase()}'`
-        );
-    }
-
-    output = `data:${outContentType};base64,${output.toString('base64')}`;
-  }
-
+  output = prepareOutputXmlTemplate($);
+  if (format.toUpperCase() === 'PNG') output = await preparePngOutput(output);
+  if (base64Encode) output = getBase64Output;
   return output;
 }
 
 module.exports = {
+  getAllTemplateData,
+  applyFontAndLabelColours,
   getIMGDimensions,
-  getLowestNumber,
-  appendImageDimensions,
-  appendBackgroundImage,
-  assignInputImage,
+  getShortestDimension,
+  applyTemplateDimensions,
+  applyBackgroundImage,
+  imageFallBackProccessing,
   applyToTemplate,
-  applyManyToTemplate,
   getTemplateStatus,
-  removeNotSignedLabelCheck,
-  appendAutographs,
-  getOutput
+  applyNotSignedLabel,
+  removeNotSignedLabel,
+  applyAutographs,
+  applyStatus,
+  applyTimeStamp,
+  getColourTheme,
+  getFinalOutput
 };

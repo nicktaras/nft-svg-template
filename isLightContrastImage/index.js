@@ -5,8 +5,7 @@ const sharp = require('sharp');
   isLightContrastImage();
 
   USE:
-  returns a boolean if the given image is light or dark. A use case
-  being to determine is white or black text should be overlayed onto the image. 
+  returns boolean
 
   interface: imageBuffer 
 

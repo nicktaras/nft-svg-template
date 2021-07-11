@@ -1,23 +1,17 @@
 const cheerio = require('cheerio');
-const recursiveFetch = require('./recursiveFetch');
-// lib to detect image contrast returning if image is light or dark
-const isLightContrastImage = require('./isLightContrastImage');
-
-// Autograph Templates
-const template = require('./htmlTemplates/labelled_autograph_template');
+const template = require('./labelled_autograph_template');
 
 const { 
-  appendImageDimensions,
-  appendBackgroundImage, 
-  getLowestNumber,
-  applyToTemplate,
-  assignInputImage,
-  getTemplateStatus,
-  getIMGDimensions,
-  applyManyToTemplate,
-  removeNotSignedLabelCheck,
-  appendAutographs,
-  getOutput
+  getAllTemplateData,
+  applyTemplateDimensions,
+  applyBackgroundImage, 
+  applyTimeStamp, 
+  applyStatus, 
+  applyNotSignedLabel,
+  removeNotSignedLabel,
+  applyAutographs,
+  applyFontAndLabelColours,
+  getFinalOutput,
 } = require('./imageGeneratorFunctions');
 
 /*
@@ -44,76 +38,87 @@ const {
 */
 
 module.exports = async (imageUrl, data, base64Encode, format = 'svg') => {
-  
-  // load SVG template
+
   const $ = cheerio.load(template);
-  let { image, contentType } = await recursiveFetch(imageUrl);
-  image = await assignInputImage({ contentType, image });
-  const { imgW, imgH } = await getIMGDimensions({ $, contentType, image });
-  const shortestInLength = getLowestNumber(imgW, imgH);
-  const rootPixelSize = (shortestInLength / 16) * 0.64;
-  const outerMargin = shortestInLength * 0.05;
-  const templateStatus = getTemplateStatus(data[0].title);
-  appendImageDimensions({ $, imgW, imgH });
-  appendBackgroundImage({ $, contentType, image, imgW, imgH });
-  applyToTemplate({
+
+  let { 
+    image,
+    templateStatus,
+    contentType,
+    imgW, 
+    imgH,
+    fontColour, 
+    labelColour,
+    rootPixelSize,
+    innerPadding
+  } = await getAllTemplateData({ $, imageUrl, data });
+
+  applyTemplateDimensions({ $, imgW, imgH });
+  applyBackgroundImage({ $, contentType, image, imgW, imgH });
+
+  applyNotSignedLabel({
     $,
-    elementName: '.autograph-nft-timestamp text', 
-    eq: 0, 
-    attr: { x: outerMargin, y: -(imgW - outerMargin * 1.5), 'font-size': rootPixelSize * 1 },
-    text: data[0].mark
+    templateStatus,
+    innerPadding, 
+    rootPixelSize,
+    elements: [
+      {
+        elementName: '.autograph-nft-not-signed text tspan', 
+        eq: 0, 
+        attr: { x: innerPadding * 1.2, y: innerPadding * 2.2, 'font-size': rootPixelSize * 1.6 }
+      },
+      { 
+        elementName: '.autograph-nft-not-signed text tspan', 
+        eq: 1, 
+        attr: { x: innerPadding * 1.2, y: innerPadding * 3.5, 'font-size': rootPixelSize * 1.6 }
+      },
+      {
+        elementName: '.autograph-nft-not-signed rect', 
+        eq: 0, 
+        attr: { x: innerPadding, y: innerPadding, width: rootPixelSize * 11, height: rootPixelSize * 3.65 }
+      }
+    ]
   });
-  if (templateStatus === "SIGNING") {
-    applyManyToTemplate({
-      $,
-      outerMargin, 
-      rootPixelSize,
-      elements: [
-        { 
-          elementName: '.autograph-nft-not-signed text tspan', 
-          eq: 0, 
-          attr: { x: outerMargin * 1.2, y: outerMargin * 2.2, 'font-size': rootPixelSize * 1.6 }
-        },
-        { 
-          elementName: '.autograph-nft-not-signed text tspan', 
-          eq: 1, 
-          attr: { x: outerMargin * 1.2, y: outerMargin * 3.5, 'font-size': rootPixelSize * 1.6 }
-        },
-        {
-          elementName: '.autograph-nft-not-signed rect', 
-          eq: 0, 
-          attr: { x: outerMargin, y: outerMargin, width: rootPixelSize * 11, height: rootPixelSize * 3.65 }
-        }
-      ]
-    });
-  }
-  removeNotSignedLabelCheck($, templateStatus);
-  await appendAutographs({ 
-    $, 
+
+  removeNotSignedLabel($, templateStatus);
+  
+  await applyAutographs({ 
+    $,
     data, 
     imgH, 
     imgW,
-    outerMargin,
+    innerPadding,
     rootPixelSize, 
-    labelContainerElement: '.autograph-nft-label-container' 
+    labelContainerElement: '.autograph-nft-label-container',
+    labelMarginTopBottom: 1.1,
+    labelHeight: rootPixelSize * 1.7
   });
-  const isLightImage = await isLightContrastImage(image);
-  const fontColourTheme = isLightImage ? 'black' : 'white';
-  const labelBackgroundColourTheme = isLightImage ? 'black' : 'white';
-  $('.autograph-nft-label rect, .autograph-nft-not-signed rect').css({
-    fill: labelBackgroundColourTheme,
+
+  applyTimeStamp({
+    $,
+    elementName: '.autograph-nft-timestamp text', 
+    eq: 0,
+    attr: { x: innerPadding, y: -(imgW - innerPadding * 1.5), 'font-size': rootPixelSize * 1 },
+    text: data[0].mark
   });
-  $('.autograph-nft-status text, .autograph-nft-timestamp text').attr({
-    fill: fontColourTheme,
-  });
-  applyToTemplate({ 
+
+  applyStatus({ 
     $,
     elementName: '.autograph-nft-status text', 
     eq: 0, 
-    attr: { fill: fontColourTheme, 'font-size': rootPixelSize * 0.8, y: rootPixelSize * 3.2, },
+    attr: { 'font-size': rootPixelSize * 0.8, y: rootPixelSize * 3.2, },
     text: data[0].title
   });
-  return await getOutput({
+
+  applyFontAndLabelColours({
+    $,
+    fontColour, 
+    labelColour,
+    labels: '.autograph-nft-label rect, .autograph-nft-not-signed rect',
+    text: '.autograph-nft-status text, .autograph-nft-timestamp text'
+  });
+
+  return await getFinalOutput({
     $,
     format,
     base64Encode

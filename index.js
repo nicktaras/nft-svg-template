@@ -14,9 +14,7 @@ const imageGenerator = require("./imageGenerator");
 // base64Encode,
 // format
 
-const format = 'svg';
-
-console.log('generate image');
+const format = 'png';
 
 imageGenerator(
   // 'https://raw.githubusercontent.com/nicktaras/json_mocks/main/elon.webp',
