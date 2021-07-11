@@ -5,34 +5,6 @@ const googleFontData = require('./googleFontData');
 const recursiveFetch = require('./recursiveFetch');
 const isLightContrastImage = require('./isLightContrastImage/index');
 
-const getAllTemplateData = async ({ $, imageUrl, data }) => {
-  let { image, contentType } = await recursiveFetch(imageUrl);
-  const { imgW, imgH } = await getIMGDimensions({ $, contentType, image });
-  const shortestDimension = getShortestDimension(imgW, imgH);
-  const { fontColour, labelColour } = await getColourTheme(image);
-  const templateStatus = getTemplateStatus(data[0].title);
-  const rootPixelSize = (shortestDimension / 16) * 0.64;
-  const innerPadding = shortestDimension * 0.05;  
-  // if webp return png
-  ({ image, contentType } = await imageFallBackProccessing({ contentType, image }));
-  return {
-    image,
-    templateStatus,
-    contentType,
-    imgW, 
-    imgH,
-    shortestDimension,
-    fontColour, 
-    labelColour,
-    rootPixelSize,
-    innerPadding
-  }
-}
-
-const applyStatus = ({ $, elementName, eq, attr, text }) => applyToTemplate({  $, elementName, eq, attr, text });
-
-const applyTimeStamp = ({ $, elementName, eq, attr, text }) => applyToTemplate({  $, elementName, eq, attr, text });
-
 const getTemplateStatus = (title) => {
   if (title.toUpperCase().startsWith('SIGNED')) return "SIGNED";
   else if (title.toUpperCase().startsWith('SIGNING')) return "SIGNING";
@@ -64,7 +36,7 @@ const applyBackgroundImage = ({ $, contentType, image, imgW, imgH }) => {
   }
 }
 
-const imageFallBackProccessing = async ({ contentType, image }) => { 
+const getImageFallbackHandler = async ({ contentType, image }) => { 
   if (contentType === 'image/webp') {
     image = await sharp(image).toFormat('png').toBuffer();
     contentType = 'image/png';
@@ -278,21 +250,44 @@ const getFinalOutput = async ({
   return output;
 }
 
+const getImageData = async ({ $, imageUrl, data }) => {
+  let { image, contentType } = await recursiveFetch(imageUrl);
+  const { imgW, imgH } = await getIMGDimensions({ $, contentType, image });
+  const shortestDimension = getShortestDimension(imgW, imgH);
+  const { fontColour, labelColour } = await getColourTheme(image);
+  // if webp return png
+  ({ image, contentType } = await getImageFallbackHandler({ contentType, image }));
+  return {
+    image,
+    contentType,
+    imgW, 
+    imgH,
+    shortestDimension,
+    fontColour, 
+    labelColour
+  }
+}
+
+// apply template dimensions and the background image
+const applyImageData = ({ $, contentType, image, imgW, imgH }) => {
+  applyTemplateDimensions({ $, imgW, imgH });
+  applyBackgroundImage({ $, contentType, image, imgW, imgH });
+}
+
 module.exports = {
-  getAllTemplateData,
+  getImageData,
+  applyImageData,
   applyFontAndLabelColours,
   getIMGDimensions,
   getShortestDimension,
   applyTemplateDimensions,
   applyBackgroundImage,
-  imageFallBackProccessing,
+  getImageFallbackHandler,
   applyToTemplate,
   getTemplateStatus,
   applyNotSignedLabel,
   removeNotSignedLabel,
   applyAutographs,
-  applyStatus,
-  applyTimeStamp,
   getColourTheme,
   getFinalOutput
 };

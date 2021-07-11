@@ -1,61 +1,38 @@
-const cheerio = require('cheerio');
-const template = require('./labelled_autograph_template');
 
-const { 
-  getAllTemplateData,
-  applyTemplateDimensions,
-  applyBackgroundImage, 
-  applyTimeStamp, 
-  applyStatus, 
+const template = require('./template');
+const cheerio = require('cheerio');
+const {
+  getImageData,
+  applyImageData,
+  applyToTemplate,
   applyNotSignedLabel,
   removeNotSignedLabel,
   applyAutographs,
   applyFontAndLabelColours,
   getFinalOutput,
-} = require('./imageGeneratorFunctions');
+  getTemplateStatus
+} = require('./../../utils/imageGeneratorFunctions');
 
-/*
-  FUNCTION:
-  imageGenerator();
-
-  USE:
-  Generates an image from the given inputs (see interface below)
-
-  interface: {
-    imageUrl
-    data: [
-    {
-      title: string; (Title of NFT)
-      photoURL: string; (Photo of Twitter User)
-      name: string; (Name of Twitter User)
-      twitterId: string; (Handle)
-      mark: string; (Like: 1507.27FEB2021)
-    }
-    ],
-    base64Encode,
-    format ('svg' or 'png')
-  }
-*/
-
-module.exports = async (imageUrl, data, base64Encode, format = 'svg') => {
+const build = async (imageUrl, data, base64Encode, format = 'svg') => {
 
   const $ = cheerio.load(template);
 
-  let { 
-    image,
-    templateStatus,
-    contentType,
-    imgW, 
-    imgH,
-    fontColour, 
-    labelColour,
-    rootPixelSize,
-    innerPadding
-  } = await getAllTemplateData({ $, imageUrl, data });
+  // read image data to get (height, width, most suitable font colour...)
+  let { image, contentType, imgW,  imgH, shortestDimension, fontColour,  labelColour } = await getImageData({ $, imageUrl, data });
 
-  applyTemplateDimensions({ $, imgW, imgH });
-  applyBackgroundImage({ $, contentType, image, imgW, imgH });
+  // e.g. 'SIGNED'
+  const templateStatus = getTemplateStatus(data[0].title);
+  
+  // define font sizing
+  const rootPixelSize = (shortestDimension / 16) * 0.64;
+  
+  // inner padding of design
+  const innerPadding = shortestDimension * 0.05;  
+  
+  // apply the image dimensions to the SVG template
+  applyImageData({ $, contentType, image, imgW, imgH })
 
+  // apply the not signed label
   applyNotSignedLabel({
     $,
     templateStatus,
@@ -80,8 +57,10 @@ module.exports = async (imageUrl, data, base64Encode, format = 'svg') => {
     ]
   });
 
+  // when the nft is signed generate without this label
   removeNotSignedLabel($, templateStatus);
   
+  // apply the autographs
   await applyAutographs({ 
     $,
     data, 
@@ -94,22 +73,25 @@ module.exports = async (imageUrl, data, base64Encode, format = 'svg') => {
     labelHeight: rootPixelSize * 1.7
   });
 
-  applyTimeStamp({
+  // add timestamp text and formatting
+  applyToTemplate({
     $,
     elementName: '.autograph-nft-timestamp text', 
-    eq: 0,
     attr: { x: innerPadding, y: -(imgW - innerPadding * 1.5), 'font-size': rootPixelSize * 1 },
+    eq: 0,
     text: data[0].mark
   });
 
-  applyStatus({ 
+  // add status text and formatting
+  applyToTemplate({ 
     $,
     elementName: '.autograph-nft-status text', 
-    eq: 0, 
     attr: { 'font-size': rootPixelSize * 0.8, y: rootPixelSize * 3.2, },
+    eq: 0,
     text: data[0].title
   });
 
+  // apply colour scheme to template
   applyFontAndLabelColours({
     $,
     fontColour, 
@@ -123,4 +105,8 @@ module.exports = async (imageUrl, data, base64Encode, format = 'svg') => {
     format,
     base64Encode
   });
+};
+
+module.exports = {
+  build
 };

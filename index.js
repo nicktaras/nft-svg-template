@@ -1,5 +1,5 @@
 fs = require('fs');
-const imageGenerator = require("./imageGenerator");
+const imageGenerator = require("./src");
 
 // imageUrl
 // data: [
