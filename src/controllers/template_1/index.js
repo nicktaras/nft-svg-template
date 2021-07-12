@@ -1,5 +1,5 @@
 
-const template = require('./template');
+const template = require('./../../templates/template_1');
 const cheerio = require('cheerio');
 const {
   getImageData,
@@ -10,8 +10,9 @@ const {
   applyAutographs,
   applyFontAndLabelColours,
   getFinalOutput,
-  getTemplateStatus
-} = require('./../../utils/imageGeneratorFunctions');
+  getTemplateStatus,
+  getBottomLabelPositionY
+} = require('./../../services/imageGeneratorFunctions');
 
 const build = async (imageUrl, data, base64Encode, format = 'svg') => {
 
@@ -58,7 +59,7 @@ const build = async (imageUrl, data, base64Encode, format = 'svg') => {
   });
 
   // when the nft is signed generate without this label
-  removeNotSignedLabel($, templateStatus);
+  removeNotSignedLabel({ $, templateStatus });
   
   // apply the autographs
   await applyAutographs({ 
@@ -73,7 +74,7 @@ const build = async (imageUrl, data, base64Encode, format = 'svg') => {
     labelHeight: rootPixelSize * 1.7
   });
 
-  // add timestamp text and formatting
+  // style timestamp and apply text
   applyToTemplate({
     $,
     elementName: '.autograph-nft-timestamp text', 
@@ -82,7 +83,7 @@ const build = async (imageUrl, data, base64Encode, format = 'svg') => {
     text: data[0].mark
   });
 
-  // add status text and formatting
+  // style status and apply text
   applyToTemplate({
     $,
     elementName: '.autograph-nft-status text', 
@@ -90,6 +91,33 @@ const build = async (imageUrl, data, base64Encode, format = 'svg') => {
     eq: 0,
     text: data[0].title
   });
+
+  const applyStatusText = ({
+    
+  }) => {
+
+  }
+  
+  const yPos = getBottomLabelPositionY({ 
+    labelHeight: rootPixelSize * 1.7,
+    labelMarginTopBottom: 1.1,
+    data,
+    innerPadding,
+    index: data.slice(0, 3).length -1,
+    imgH
+  });
+
+  // Status text positioning (should be updated to be dynamic).
+  let xPosStatus;
+  if (data[0].title.toUpperCase().indexOf('SIGNED') > -1) {
+    xPosStatus = imgW - rootPixelSize * 3.2 - innerPadding;
+  } else if (data[0].title.toUpperCase().indexOf('SIGNING') > -1) {
+    xPosStatus = imgW - rootPixelSize * 3.8 - innerPadding;
+  } else {
+    xPosStatus = imgW - rootPixelSize * 5.2 - innerPadding;
+  }
+  $('.autograph-nft-status').attr({ x: xPosStatus, y: yPos - rootPixelSize * 4 });
+  $('.autograph-nft-status text').attr({ 'font-size': rootPixelSize * 0.8, y: rootPixelSize * 3.2 });
 
   // apply colour scheme to template
   applyFontAndLabelColours({

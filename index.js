@@ -17,7 +17,7 @@ const imageGenerator = require("./src");
 const format = 'svg';
 
 imageGenerator(
-  // 'https://raw.githubusercontent.com/nicktaras/json_mocks/main/elon.webp',
+  'https://raw.githubusercontent.com/nicktaras/json_mocks/main/elon.webp',
   // "https://rinkeby.alchemynft.io/upload/0xf2ef6c799c09b241af7300c0eb835cf80a4d9d1968973d3281f1dbc71c47dd55-1625634009013.webp",
   // "https://media-cdn.tripadvisor.com/media/photo-s/1a/dd/6a/f0/paradise-taveuni.jpg",
   // "https://images.unsplash.com/photo-1590272456521-1bbe160a18ce?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
@@ -26,7 +26,7 @@ imageGenerator(
   // "https://storage.opensea.io/files/0fbeacdb0bf089800109f3b1d0401c6b.svg",
   // "https://s3-us-west-2.amazonaws.com/s.cdpn.io/13471/sparkles.gif",
   // "https://images.unsplash.com/photo-1556103255-4443dbae8e5a?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8cGhvdG9ncmFwaGVyfGVufDB8fDB8fA%3D%3D&ixlib=rb-1.2.1&w=1000&q=80",
-  "https://media.istockphoto.com/photos/white-studio-background-picture-id1040250650?k=6&m=1040250650&s=612x612&w=0&h=Ve0znmMwCbVyo66uIfeSrSYRuHau85oBiVIv1OplATs=",
+  // "https://media.istockphoto.com/photos/white-studio-background-picture-id1040250650?k=6&m=1040250650&s=612x612&w=0&h=Ve0znmMwCbVyo66uIfeSrSYRuHau85oBiVIv1OplATs=",
   // "https://upload.wikimedia.org/wikipedia/commons/4/4f/SVG_Logo.svg",
   // "https://i.pinimg.com/originals/a9/e5/06/a9e506364ae6b6892e6a126a2f021206.gif",
   // "https://polkadot.network/content/images/2020/06/Polkadot_OG.png",

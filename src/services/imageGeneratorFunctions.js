@@ -13,8 +13,6 @@ const getTemplateStatus = (title) => {
 
 const getShortestDimension = (a, b) => { return a < b ? a : b }
 
-const applyTemplateDimensions = ({ $, imgW, imgH }) => $('.autograph-nft-wrapper').css({ height: imgH, width: imgW }).attr({ viewBox: `0 0 ${imgW} ${imgH}` });
-
 const getIMGDimensions = async ({ $, contentType, image }) => {
   if (contentType === 'image/svg') {
     const svgEl = $(image);
@@ -23,16 +21,6 @@ const getIMGDimensions = async ({ $, contentType, image }) => {
   } else {
     const getIMGDimensions = await getDimensionsIMG(image);
     return { imgW: getIMGDimensions.imgW, imgH: getIMGDimensions.imgH }
-  }
-}
-
-const applyBackgroundImage = ({ $, contentType, image, imgW, imgH }) => {
-  if (contentType === 'image/svg') {
-    const svgEl = $(image);
-    $('.autograph-nft-image-container').html(svgEl);
-  } else {
-    const imageBase64 = `data:${contentType};base64,` + image.toString('base64');
-    $('.autograph-nft-image-container image').eq(0).attr({ href: imageBase64, height: imgH, width: imgW });
   }
 }
 
@@ -45,12 +33,6 @@ const getImageFallbackHandler = async ({ contentType, image }) => {
     image,
     contentType
   };
-}
-
-const applyToTemplate = ({ $, elementName, eq, attr, text }) => {
-  const el = $(elementName).eq(eq);
-  if(attr) { el.attr(attr); }   
-  if(text) { el.text(text); }
 }
 
 const getColourTheme = async (image) => {
@@ -83,9 +65,10 @@ const applyNotSignedLabel = ({
     });
   }
 }
-const removeNotSignedLabel = (templateStatus) => {
+const removeNotSignedLabel = ({ $, templateStatus }) => {
   if (templateStatus === 'SIGNED') $('.autograph-nft-not-signed').remove();
 }
+
 const applyFontAndLabelColours = ({ 
   $, 
   fontColour,
@@ -97,10 +80,96 @@ const applyFontAndLabelColours = ({
   $(text).css({ fill: fontColour });
 }
 
+const applyToTemplate = ({ $, elementName, eq, attr, text }) => {
+  const el = $(elementName).eq(eq);
+  if(attr) { el.attr(attr); }   
+  if(text) { el.text(text); }
+}
+
+const applyTemplateDimensions = ({ $, imgW, imgH }) => $('.autograph-nft-wrapper').css({ height: imgH, width: imgW }).attr({ viewBox: `0 0 ${imgW} ${imgH}` });
+
+const applyBackgroundImage = ({ $, contentType, image, imgW, imgH }) => {
+  if (contentType === 'image/svg') {
+    const svgEl = $(image);
+    $('.autograph-nft-image-container').html(svgEl);
+  } else {
+    const imageBase64 = `data:${contentType};base64,` + image.toString('base64');
+    $('.autograph-nft-image-container image').eq(0).attr({ href: imageBase64, height: imgH, width: imgW });
+  }
+}
+
 const getBase64TwitterImage = async (photoURL) => {
   const { image, contentType } = await recursiveFetch(photoURL);
   const imagePhotoURLBuffer = await sharp(image).toBuffer();
   return `data:${contentType};base64, ${imagePhotoURLBuffer.toString('base64')}`;
+}
+
+const makeLabel = ({
+  x, 
+  y, 
+  width, 
+  height, 
+  fontSize, 
+  text, 
+  innerPadding, 
+  twitterImageSize,  
+  twitterImg, 
+}) => {
+  return `<svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${x}" y="${y}"><rect x="0" y="0" width="${width}" height="${height}" style="black" fill-opacity="0.3" rx="2"></rect><text x="0" y="0" style="font-family: 'Barlow'; fill:white;" font-size="${fontSize}">${text}</text><svg x="${innerPadding}" y="${innerPadding}" width="${twitterImageSize}" height="${twitterImageSize}"><defs><clipPath id="myCircle"><circle cx="${twitterImageSize / 2}" cy="${twitterImageSize / 2}" r="${twitterImageSize / 2}" fill="#FFFFFF" /></clipPath></defs><image href="${twitterImg}" width="${twitterImageSize}" height="${twitterImageSize}" clip-path="url(#myCircle)" /></svg></svg>`;
+}
+
+const makeLabelText = ({ 
+  x, 
+  y,
+  width, 
+  character
+}) => { return `<tspan x="${x}" y="${y}" width=${width}>${character}</tspan>`; };
+
+
+const getSignaturePartial = ({ name, id, x, y, rootPixelSize }) => {
+  let textWidth = 0;
+  let text = '';
+  // example input to map function [@,B,e,e,p,l,e,.,3,4,6,4,6,6,5,6,4]
+  [...name.match(/./g), ...['.'], ...id.match(/./g)].map(
+    character => {
+      let characterWidth = googleFontData[character];
+      if (!characterWidth) characterWidth = googleFontData[1]; // fall back if no character is found.
+      text += makeLabelText({ x: x + textWidth, y, width: characterWidth, character });
+      textWidth += characterWidth * (rootPixelSize * 0.065);
+    }
+  );
+  return {
+    text,
+    textWidth
+  }
+}
+
+const makeMoreLabel = ({
+  x,
+  y,
+  width,
+  height,
+  fontSize,
+  textX,
+  textY,
+  remainingLabels
+}) => {
+  return `<svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${x}" y="${y}"><g><rect x="0" y="0" width="${width}" height="${height}" style="fill:rgb(255,255,255)" fill-opacity="0.24" rx="2"></rect><text style="font-family: 'Barlow'; fill:white;" font-size="${fontSize}"><tspan x="${textX}" y="${textY}">AND ${remainingLabels} MORE...</tspan></text></g></svg>`;
+}
+
+const getBottomLabelPositionY = ({
+  labelHeight,
+  labelMarginTopBottom,
+  data,
+  innerPadding,
+  index,
+  imgH
+}) => {
+  const labelPositionByIndex = index * (labelHeight * labelMarginTopBottom);
+  const offset = data.length > 3 ? labelHeight * 1.8 : 0;
+  const addinnerPadding = data.length <= 3 ? innerPadding : 0;
+  const yPos = imgH - labelHeight - labelPositionByIndex - offset - addinnerPadding;
+  return yPos;
 }
 
 const applyAutographs = async ({ 
@@ -114,6 +183,7 @@ const applyAutographs = async ({
   labelMarginTopBottom,
   labelHeight,
 }) => {
+
   // Collect the last three labels (upto 3 will be shown in the view)
   let labelData = data.slice(0, 3);
 
@@ -125,77 +195,64 @@ const applyAutographs = async ({
   let lastLabelYPos = 0;
 
   await Promise.all(labelData.map(async (label, index) => {
-    let textWidth = 0;
-    const labelPositionByIndex = index * (labelHeight * labelMarginTopBottom);
-    const offset = data.length > 3 ? labelHeight * 1.8 : 0;
-    const addinnerPadding = data.length <= 3 ? innerPadding : 0;
-    const yPos = imgH - labelHeight - labelPositionByIndex - offset - addinnerPadding;
+    const yPos = getBottomLabelPositionY({ 
+      labelHeight,
+      labelMarginTopBottom,
+      data,
+      innerPadding,
+      index,
+      imgH
+    });
+
+    console.log(yPos);
+    
     lastLabelYPos = yPos;
-    let autographSVGText = '';
-    // incremented as the letters are defined in SVG
-    textWidth = 0;
-    // e.g. [@,B,e,e,p,l,e,.,3,4,6,4,6,6,5,6,4]
-    [...label.name.match(/./g), ...['.'], ...label.twitterId.match(/./g)].map(
-      char => {
-        let val = googleFontData[char];
-        if (!val) val = googleFontData[1];
-        autographSVGText += `<tspan x="${labelHeight + textWidth}" y="${
-          rootPixelSize * 1.2
-        }" width=${val}>${char}</tspan>`;
-        // adjust for spacing between letters
-        textWidth += val * (rootPixelSize * 0.065);
-      }
-    );
+
+    let { text, textWidth } = getSignaturePartial({ 
+      x: rootPixelSize * 1.7,
+      y: rootPixelSize * 1.2,
+      rootPixelSize: rootPixelSize,
+      name: label.name, 
+      id: label.twitterId,
+    });
+
     const twitterIdProfileWidth = rootPixelSize * 1.9;
-    const twitterImageWidth = rootPixelSize * 1.4; // twitter image inside label
-    const imgPadding = rootPixelSize * 0.15; // padding top / left for image
+    const twitterImageWidth = rootPixelSize * 1.4;
+    const imgPadding = rootPixelSize * 0.15;
     const autographFontSize = rootPixelSize * 1.1;
     const imagePhotoURLBase64 = await getBase64TwitterImage(label.photoURL);
     textWidth += twitterIdProfileWidth;
-    // build label templates
-    labelTemplates += `<svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${
-      imgW - textWidth - innerPadding
-    }" y="${yPos}"><rect x="0" y="0" width="${textWidth}" height="${
-      labelHeight
-    }" style="black" fill-opacity="0.3" rx="2"></rect><text x="0" y="0" style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">${autographSVGText}</text><svg x="${imgPadding}" y="${imgPadding}" width="${twitterImageWidth}" height="${twitterImageWidth}"><defs><clipPath id="myCircle"><circle cx="${
-      twitterImageWidth / 2
-    }" cy="${twitterImageWidth / 2}" r="${
-      twitterImageWidth / 2
-    }" fill="#FFFFFF" /></clipPath></defs><image href="${imagePhotoURLBase64}" width="${twitterImageWidth}" height="${twitterImageWidth}" clip-path="url(#myCircle)" /></svg></svg>`;
+    
+    labelTemplates += makeLabel({ 
+      x: imgW - textWidth - innerPadding,
+      y: yPos,
+      width: textWidth,
+      height: labelHeight,
+      fontSize: autographFontSize,
+      text: text,
+      innerPadding: imgPadding,
+      twitterImageSize: twitterImageWidth,
+      twitterImg: imagePhotoURLBase64
+     });
+    
+    // When there are a max of 3 labels and more to show.
     if (data.length > 3 && index === 2) {
-      const yPos = imgH - labelHeight * 1.7;
-      const maxLabelTemplate = `
-        <svg class="autograph-nft-label" xmlns="http://www.w3.org/2000/svg" x="${
-          imgW - autographFontSize * 6.5 - innerPadding
-        }" y="${yPos}">
-          <g>
-            <rect x="0" y="0" width="${
-              autographFontSize * 6.5
-            }" height="${labelHeight}" style="fill:rgb(255,255,255)" fill-opacity="0.24" rx="2"></rect>
-            <text style="font-family: 'Barlow'; fill:white;" font-size="${autographFontSize}">
-              <tspan x="${rootPixelSize * 0.2}" y="${rootPixelSize * 1.2}">AND ${
-        data.length - 3
-      } MORE...</tspan>
-            </text>
-          </g>
-        </svg>
-      `;
+      const maxLabelTemplate = makeMoreLabel({
+        x: imgW - autographFontSize * 6.5 - innerPadding,
+        y: imgH - labelHeight * 1.7,
+        width: autographFontSize * 6.5,
+        height: labelHeight,
+        fontSize: autographFontSize,
+        textX: rootPixelSize * 0.2,
+        textY: rootPixelSize * 1.2,
+        remainingLabels: data.length - 3
+      });
       labelTemplates += maxLabelTemplate;
     }
   }))
-  // Status text positioning (should be updated to be dynamic).
-  let xPosStatus;
-  if (data[0].title.toUpperCase().indexOf('SIGNED') > -1) {
-    xPosStatus = imgW - rootPixelSize * 3.2 - innerPadding;
-  } else if (data[0].title.toUpperCase().indexOf('SIGNING') > -1) {
-    xPosStatus = imgW - rootPixelSize * 3.8 - innerPadding;
-  } else {
-    xPosStatus = imgW - rootPixelSize * 5.2 - innerPadding;
-  }
-  $('.autograph-nft-status').attr({ x: xPosStatus, y: lastLabelYPos - rootPixelSize * 4 });
-  $('.autograph-nft-status text').attr({ 'font-size': rootPixelSize * 0.8, y: rootPixelSize * 3.2 });
-  // apply all the labels to the Remixed NFT template
+
   $(labelContainerElement).eq(0).append(`${labelTemplates}`);
+
 }
 
 const getBase64Output = ({ format, output }) => {
@@ -256,7 +313,7 @@ const getImageData = async ({ $, imageUrl }) => {
   const shortestDimension = getShortestDimension(imgW, imgH);
   const { fontColour, labelColour } = await getColourTheme(image);
   // if webp return png
-  // ({ image, contentType } = await getImageFallbackHandler({ contentType, image }));
+  ({ image, contentType } = await getImageFallbackHandler({ contentType, image }));
   return {
     image,
     contentType,
@@ -277,6 +334,7 @@ const applyImageData = ({ $, contentType, image, imgW, imgH }) => {
 module.exports = {
   getImageData,
   applyImageData,
+  getBottomLabelPositionY,
   applyFontAndLabelColours,
   getIMGDimensions,
   getShortestDimension,
