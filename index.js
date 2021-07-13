@@ -41,13 +41,13 @@ imageGenerator(
       twitterId: "1385403298945986561",
       mark: "123456"
     },
-    {
-      title: "Signed",
-      photoURL: "https://pbs.twimg.com/profile_images/879737418609553409/yjnyAhAI_400x400.jpg",
-      name: "@cryptopunksbot",
-      twitterId: "1145403668945986561",
-      mark: "0000000"
-    },
+    // {
+    //   title: "Signed",
+    //   photoURL: "https://pbs.twimg.com/profile_images/879737418609553409/yjnyAhAI_400x400.jpg",
+    //   name: "@cryptopunksbot",
+    //   twitterId: "1145403668945986561",
+    //   mark: "0000000"
+    // },
     // {
     //   title: "Signed",
     //   photoURL: "https://pbs.twimg.com/profile_images/1084788308595617793/DOnqq1OM_400x400.jpg",

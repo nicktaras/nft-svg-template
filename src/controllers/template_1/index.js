@@ -65,7 +65,15 @@ const build = async (imageUrl, data, base64Encode, format) => {
   const innerPadding = percToNumber({ baseNumber: shortestDimension, requiredPerc: 5 });
   const labelHeight = rootPixelSize * 1.7;
   const labelStatusXpos = getStatusXPos({ title: data[0].title.toUpperCase(), imgW, rootPixelSize, innerPadding });
-  const labelStatusYPos = getBottomLabelPositionY({ labelHeight, labelMarginTopBottom: 1.2, data, innerPadding, index: data.length > labelDataWithImages.length ? labelDataWithImages.length + 1 : labelDataWithImages.length, imgH });
+  const labelStatusYPos = getBottomLabelPositionY({ 
+    labelHeight, 
+    labelMarginTopBottom: 1.1, 
+    autographLength: data.length > labelDataWithImages.length ? labelDataWithImages.length + 1 : labelDataWithImages.length, 
+    innerPadding,
+    index: labelDataWithImages.length - 1, 
+    imgH
+  }) - (rootPixelSize * .7);
+
   const notSignedWidth = rootPixelSize * 11;
   const notSignedHeight = rootPixelSize * 3.65;
   const notSignedFontSize = rootPixelSize * 1.6;
@@ -122,7 +130,7 @@ const build = async (imageUrl, data, base64Encode, format) => {
   });
 
   // AUTOGRAPH
-  await applyAutographs({
+  applyAutographs({
     $,
     autographLength: data.length,
     imgH, 

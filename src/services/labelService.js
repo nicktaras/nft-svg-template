@@ -70,6 +70,12 @@ const applyAutographs = ({
       index,
       imgH
     });
+    console.log("yPos", yPos, labelHeight,
+      labelMarginTopBottom,
+      autographLength,
+      innerPadding,
+      index,
+      imgH);
     
     let { text, textWidth } = getSignaturePartial({ 
       x: rootPixelSize * 1.7,
