@@ -63,7 +63,7 @@ module.exports = async (imageBuffer) => {
   // get average luminance value of light vs dark pixels.
   const avg = mean(colorList);
   
-  console.log("avg is:", avg, (avg <= 0.22) ? "this is a light image" : "this is a dark image");
+  // console.log("avg is:", avg, (avg <= 0.22) ? "this is a light image" : "this is a dark image");
 
   return (avg <= 0.22) ? true : false;
 };

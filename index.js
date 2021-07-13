@@ -14,12 +14,13 @@ const imageGenerator = require("./src");
 // base64Encode,
 // format
 
-const format = 'svg';
+const format = 'png';
 
 imageGenerator(
   'https://raw.githubusercontent.com/nicktaras/json_mocks/main/elon.webp',
   // "https://rinkeby.alchemynft.io/upload/0xf2ef6c799c09b241af7300c0eb835cf80a4d9d1968973d3281f1dbc71c47dd55-1625634009013.webp",
   // "https://media-cdn.tripadvisor.com/media/photo-s/1a/dd/6a/f0/paradise-taveuni.jpg",
+  // "https://alchemynft.io/1/remix/0x22a196d6e1db2a131fb79eab72039b2789556bbf8a4375b3544ecb3b11fdf2fb.svg",
   // "https://images.unsplash.com/photo-1590272456521-1bbe160a18ce?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
   // "https://www.laminex.com.au/medias/p-LX-ColourCollection-Chalk-White-RGB-1200x1200-LR.jpg-1200Wx979H?context=bWFzdGVyfGltYWdlc3wyNzM1OXxpbWFnZS9qcGVnfGgwNS9oYWMvODg2Njg0NTgxODkxMC9wX0xYX0NvbG91ckNvbGxlY3Rpb25fQ2hhbGtfV2hpdGVfUkdCXzEyMDB4MTIwMF9MUi5qcGdfMTIwMFd4OTc5SHxiM2Y1ZGUyYzYxMTc5YjUwMzZkNjA4NjEzZWM3ZDg4YWVjOWM4ZjdhMDNhNTBlYzEyZTc3NmRlOGRlOTFiMzEx",
   // "https://lh3.googleusercontent.com/r-hAVIErP0UEiYUhoHU9KS53Wl25rzqpBCt2V4IzQRVxtncH2KqpU0m6_26l2eqoQSD3BWP8InLJNTomvMy2G2ZD=s0",
@@ -38,29 +39,29 @@ imageGenerator(
       photoURL: "https://pbs.twimg.com/profile_images/264316321/beeple_headshot_beat_up_400x400.jpg",
       name: "@weihong_hu",
       twitterId: "1385403298945986561",
-      mark: "17654321"
+      mark: "123456"
     },
     {
       title: "Signed",
       photoURL: "https://pbs.twimg.com/profile_images/879737418609553409/yjnyAhAI_400x400.jpg",
       name: "@cryptopunksbot",
       twitterId: "1145403668945986561",
-      mark: "123456"
+      mark: "0000000"
     },
-    {
-      title: "Signed",
-      photoURL: "https://pbs.twimg.com/profile_images/1084788308595617793/DOnqq1OM_400x400.jpg",
-      name: "@ethereum",
-      twitterId: "6919871298945986561",
-      mark: "154321"
-    },
-    {
-      title: "Signed",
-      photoURL: "https://pbs.twimg.com/profile_images/1389823228533739522/-Tj2WF_6_400x400.jpg",
-      name: "@Polkadot",
-      twitterId: "1385403298945986561",
-      mark: "1154321"
-    },
+    // {
+    //   title: "Signed",
+    //   photoURL: "https://pbs.twimg.com/profile_images/1084788308595617793/DOnqq1OM_400x400.jpg",
+    //   name: "@ethereum",
+    //   twitterId: "6919871298945986561",
+    //   mark: "0000000"
+    // },
+    // {
+    //   title: "Signed",
+    //   photoURL: "https://pbs.twimg.com/profile_images/1389823228533739522/-Tj2WF_6_400x400.jpg",
+    //   name: "@Polkadot",
+    //   twitterId: "1385403298945986561",
+    //   mark: "0000000"
+    // },
   ],
   false,
   format
